@@ -17,8 +17,8 @@
 import {
   findProduct,
   updateOrderLine,
-  deleteOrderLine,
-  processOrder
+  deleteOrderLine
+  // processOrder
 } from '@/api/ADempiere/form/point-of-sales.js'
 import {
   formatDate,
@@ -461,7 +461,8 @@ export default {
         showClose: true
       })
       this.$store.commit('setProcessLoading', true)
-      processOrder({
+      // processOrder({
+      this.$store.dispatch('processOrder', {
         posUuid,
         orderUuid,
         isOpenRefund: !this.isEmptyValue(this.$store.getters.getListRefundReference),

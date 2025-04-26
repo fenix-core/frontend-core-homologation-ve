@@ -448,7 +448,7 @@ import {
 } from '@/components/ADempiere/Form/VPOS/containerManagerPos.js'
 
 // api request methods
-import { processOrder } from '@/api/ADempiere/form/point-of-sales.js'
+// import { processOrder } from '@/api/ADempiere/form/point-of-sales.js'
 import { REPORT_VIEWER_NAME } from '@/utils/ADempiere/constants/report'
 import {
   buildLinkHref
@@ -1682,7 +1682,14 @@ export default {
       })
       // this.$store.commit('setShowPOSCollection', false)
       this.$store.commit('setProcessLoading', true)
-      processOrder({
+      // processOrder({
+      //   posUuid,
+      //   orderUuid,
+      //   isOpenRefund: !this.isEmptyValue(this.$store.getters.getListRefundReference),
+      //   createPayments: !this.isEmptyValue(payment),
+      //   payments: payment
+      // })
+      this.$store.dispatch('processOrder', {
         posUuid,
         orderUuid,
         isOpenRefund: !this.isEmptyValue(this.$store.getters.getListRefundReference),

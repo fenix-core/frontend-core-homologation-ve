@@ -540,7 +540,7 @@ import formMixin from '@/components/ADempiere/Form/formMixin'
 import posMixin from '@/components/ADempiere/Form/VPOS/posMixin.js'
 import fieldsListOverdrawnInvoice from './fieldsListOverdrawnInvoice.js'
 import typeCollection from '@/components/ADempiere/Form/VPOS/Collection/typeCollection'
-import { processOrder } from '@/api/ADempiere/form/point-of-sales.js'
+// import { processOrder } from '@/api/ADempiere/form/point-of-sales.js'
 import { validatePin } from '@/api/ADempiere/form/point-of-sales.js'
 import {
   getLookupList,
@@ -1904,7 +1904,8 @@ export default {
         showClose: true
       })
       this.$store.commit('setProcessLoading', true)
-      processOrder({
+      // processOrder({
+      this.$store.dispatch('processOrder', {
         posUuid,
         orderUuid,
         isOpenRefund: !this.isEmptyValue(this.$store.getters.getListRefundReference),

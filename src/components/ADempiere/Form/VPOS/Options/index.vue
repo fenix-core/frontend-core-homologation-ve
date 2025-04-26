@@ -747,7 +747,7 @@
                             }}
                           </span>
                         </div>
-                        <div class="bottom clearfix" style="margin-top: 0px !important!">
+                        <div class="bottom clearfix" style="margin-top: 0px !important">
                           <el-button
                             type="text"
                             class="button"
@@ -1013,8 +1013,8 @@ import {
   createNewReturnOrder,
   deleteOrder,
   reverseSales,
-  copyOrder,
-  processOrder
+  copyOrder
+  // processOrder
 } from '@/api/ADempiere/form/point-of-sales.js'
 import {
   newOrderFromRMA
@@ -2035,7 +2035,8 @@ export default {
         showClose: true
       })
       this.$store.commit('setProcessLoading', true)
-      processOrder({
+      this.$store.dispatch('processOrder', {
+      // processOrder({
         posUuid,
         orderUuid,
         isOpenRefund: !isEmptyValue(this.$store.getters.getListRefundReference),

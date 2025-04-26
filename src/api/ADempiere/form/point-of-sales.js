@@ -1746,3 +1746,31 @@ export function listCreditMemoRequest({
       return camelizeObjectKeys(response)
     })
 }
+
+/**
+ * POS Homologation
+ */
+export function simulateProcessOrder({
+  posId
+}) {
+  return request({
+    url: `${config.homologation.endpoint}/${posId}/process/simulate`,
+    method: 'post'
+  })
+}
+
+export function processWithoutPrint({
+  posId
+}) {
+  return request({
+    url: `${config.homologation.endpoint}/${posId}/process`,
+    method: 'post'
+  })
+}
+
+export function getSystemInfo() {
+  return request({
+    url: `${config.homologation.endpoint}/system-info`,
+    method: 'get'
+  })
+}

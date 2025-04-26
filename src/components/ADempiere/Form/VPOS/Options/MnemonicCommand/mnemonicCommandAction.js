@@ -20,7 +20,7 @@ import lang from '@/lang'
 // API Request Methods
 import {
   generateImmediateInvoice,
-  processOrder,
+  // processOrder,
   deleteOrder
 } from '@/api/ADempiere/form/point-of-sales.js'
 // Utils and Helper Methods
@@ -170,7 +170,8 @@ function completeOrder() {
   if (isEmptyValue(currentOrder) || currentOrder.documentStatus.value) return true
   const isOpenRefund = !isEmptyValue(store.getters.getListRefundReference)
   this.$store.commit('setProcessLoading', true)
-  processOrder({
+  // processOrder({
+  this.$store.dispatch('processOrder', {
     posUuid: uuid,
     orderUuid: currentOrder.uuid,
     isOpenRefund,

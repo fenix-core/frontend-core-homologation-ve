@@ -46,6 +46,9 @@
   "pointOfSales": {
     "endpoint": "/form/addons/point-of-sales"
   },
+  "homologation": {
+    "endpoint": "/v1/pos/homologation"
+  },
   "priceChecking": {
     "endpoint": "/form/addons/point-of-sales"
   },

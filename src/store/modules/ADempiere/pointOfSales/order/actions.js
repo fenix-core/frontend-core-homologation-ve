@@ -27,7 +27,11 @@ import {
   createOrderLine,
   listOrders,
   printTicket,
-  printTicketPreviwer
+  printTicketPreviwer,
+  processOrder,
+  simulateProcessOrder,
+  processWithoutPrint,
+  getSystemInfo
 } from '@/api/ADempiere/form/point-of-sales.js'
 
 // utils and helper methods
@@ -460,6 +464,109 @@ export default {
             message: error.message,
             showClose: true
           })
+        })
+    })
+  },
+  processOrder({
+    getters,
+    dispatch
+  }, {
+    posUuid,
+    orderUuid,
+    isOpenRefund,
+    createPayments,
+    payments
+  }) {
+    return new Promise((resolve, reject) => {
+      const posId = getters.posAttributes.currentPointOfSales.id
+      dispatch('simulateProcessOrder', { posId })
+        .then(() => {
+          processOrder({
+            posUuid,
+            orderUuid,
+            isOpenRefund,
+            createPayments,
+            payments
+          })
+            .then(response => {
+              resolve(response)
+            })
+            .catch(error => {
+              showMessage({
+                type: 'error',
+                message: error.message,
+                showClose: true
+              })
+              reject(error)
+            })
+        })
+    })
+  },
+  simulateProcessOrder({
+    dispatch
+  }, {
+    posId
+  }) {
+    return new Promise((resolve, reject) => {
+      simulateProcessOrder({
+        posId
+      })
+        .then(response => {
+          resolve(response)
+        })
+        .catch(error => {
+          showMessage({
+            type: 'error',
+            message: error.message,
+            showClose: true
+          })
+          reject(error)
+        })
+    })
+  },
+  processWithoutPrint({
+    getters,
+    dispatch
+  }, {
+    posId
+  }) {
+    return new Promise((resolve, reject) => {
+      processWithoutPrint({
+        posId
+      })
+        .then(response => {
+          resolve(response)
+        })
+        .catch(error => {
+          showMessage({
+            type: 'error',
+            message: error.message,
+            showClose: true
+          })
+          reject(error)
+        })
+    })
+  },
+  getSystemInfo({
+    getters,
+    dispatch
+  }, {
+    posId
+  }) {
+    return new Promise((resolve, reject) => {
+      getSystemInfo({
+        posId
+      })
+        .then(response => {
+          resolve(response)
+        })
+        .catch(error => {
+          showMessage({
+            type: 'error',
+            message: error.message,
+            showClose: true
+          })
+          reject(error)
         })
     })
   }
