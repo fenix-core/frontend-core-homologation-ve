@@ -318,6 +318,7 @@ export default {
           ordersHistory: 'Histórico de Órdenes ',
           generateImmediateInvoice: 'Generar Factura Inmediata',
           completePreparedOrder: 'Completar Orden Preparada',
+          simulateWithoutPrint: 'Simular Sin Imprimir',
           cancelSaleTransaction: 'Anular Transacción de Venta',
           createPos: 'Crear Retiro de Punto de Venta',
           print: 'Imprimir Documento',

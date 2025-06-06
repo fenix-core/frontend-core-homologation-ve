@@ -774,7 +774,7 @@ export function processOrder({
         description: parameter.description,
         amount: parameter.amount,
         tender_type_code: parameter.tenderTypeCode,
-        payment_ate: parameter.paymentDate,
+        payment_date: parameter.paymentDate,
         currency_uid: parameter.currencyUuid
       }
     })
@@ -1750,24 +1750,75 @@ export function listCreditMemoRequest({
 /**
  * POS Homologation
  */
+// Process Order
 export function simulateProcessOrder({
-  posId
+  id,
+  posId,
+  pos_uuid,
+  payments,
+  is_open_refund
 }) {
+  if (!isEmptyValue(payments)) {
+    payments = payments.map(parameter => {
+      return {
+        invoice_uuid: parameter.invoiceUuid,
+        bank_uuid: parameter.bankUuid,
+        reference_no: parameter.referenceNo,
+        description: parameter.description,
+        amount: String(parameter.amount),
+        tender_type_code: parameter.tenderTypeCode,
+        payment_date: parameter.paymentDate,
+        currency_uid: parameter.currencyUuid
+      }
+    })
+  }
   return request({
-    url: `${config.homologation.endpoint}/${posId}/process/simulate`,
-    method: 'post'
+    url: `${config.homologation.endpoint}/${posId}/process/${id}/simulate`,
+    method: 'post',
+    data: {
+      posId,
+      pos_uuid,
+      payments,
+      is_open_refund
+    }
   })
 }
-
+//	Process without Print
 export function processWithoutPrint({
-  posId
+  id,
+  posId,
+  orderNr,
+  pos_uuid,
+  payments,
+  is_open_refund
 }) {
+  if (!isEmptyValue(payments)) {
+    payments = payments.map(parameter => {
+      return {
+        invoice_uuid: parameter.invoiceUuid,
+        bank_uuid: parameter.bankUuid,
+        reference_no: parameter.referenceNo,
+        description: parameter.description,
+        amount: String(parameter.amount),
+        tender_type_code: parameter.tenderTypeCode,
+        payment_date: parameter.paymentDate,
+        currency_uid: parameter.currencyUuid
+      }
+    })
+  }
   return request({
-    url: `${config.homologation.endpoint}/${posId}/process`,
-    method: 'post'
+    url: `${config.homologation.endpoint}/${posId}/process/${id}`,
+    method: 'post',
+    data: {
+      posId,
+      orderNr,
+      pos_uuid,
+      payments,
+      is_open_refund
+    }
   })
 }
-
+// Get a System Information
 export function getSystemInfo() {
   return request({
     url: `${config.homologation.endpoint}/system-info`,

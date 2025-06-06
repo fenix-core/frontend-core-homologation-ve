@@ -151,6 +151,82 @@
             </el-card>
           </el-col>
 
+          <!-- completePreparedOrder -->
+          <!-- <el-col :span="size" style="padding-left: 12px;padding-right: 12px;padding-bottom: 10px;">
+            <el-card shadow="hover" style="height: 100px">
+              <p
+                :class="(isEmptyValue(currentOrder.uuid) || currentOrder.documentStatus.value !== 'DR') ? 'is-disabled-option-card' : 'is-enable-option-card'"
+                @click="simulateWithoutPrint()"
+              >
+                <svg-icon icon-class="printNot" />
+                <br>
+                {{ $t('form.pos.optionsPoinSales.salesOrder.simulateWithoutPrint') }}
+              </p>
+            </el-card>
+          </el-col> -->
+          <el-col v-if="!isEmptyValue(currentOrder.uuid)" :span="size" style="padding-left: 12px;padding-right: 12px;padding-bottom: 10px;">
+            <el-card shadow="hover" style="height: 100px">
+              <el-popover
+                v-model="visiblePrint"
+                placement="top"
+                width="450"
+              >
+                <el-row v-if="!isLoadingReverse" :gutter="24" class="container-reverse">
+                  <el-col :span="24" class="container-reverse">
+                    <p class="container-popover">
+                      <b class="container-popover">
+                        {{ $t('form.pos.collect.orderNr') }}
+                      </b>
+                    </p>
+                  </el-col>
+                  <el-col :span="24">
+                    {{ isEmptyValue(invoceNr) }}
+                    <el-input
+                      v-model="invoceNr"
+                      :placeholder="$t('form.pos.collect.orderNr')"
+                      @change="simulateWithoutPrint()"
+                    />
+                  </el-col>
+                  <el-col :span="24">
+                    <samp class="spam-button">
+                      <el-button
+                        type="danger"
+                        icon="el-icon-close"
+                        style="background: #ff6d6d;border-color: #ff6d6d;background-color: #ff6d6d;"
+                        @click="closeSimulateWithoutPrint()"
+                      />
+                      <el-button
+                        type="primary"
+                        style="background: #46a6ff;border-color: #46a6ff;background-color: #46a6ff;"
+                        icon="el-icon-check"
+                        :disabled="isEmptyValue(invoceNr)"
+                        @click="simulateWithoutPrint()"
+                      />
+                    </samp>
+                  </el-col>
+                </el-row>
+                <div
+                  v-else
+                  key="form-loading"
+                  v-loading="isLoadingReverse"
+                  :element-loading-text="$t('notifications.loading')"
+                  :element-loading-spinner="'el-icon-loading'"
+                  element-loading-background="rgba(255, 255, 255, 0.8)"
+                  class="view-loading"
+                />
+                <el-button
+                  slot="reference"
+                  type="text"
+                  :class="isEmptyValue(currentOrder.uuid) ? 'is-disabled-option-popover' : 'is-enable-option-popover'"
+                >
+                  <svg-icon icon-class="printNot" style="font-size: 20px; margin-bottom: 15px;" />
+                  <br>
+                  {{ $t('form.pos.optionsPoinSales.salesOrder.simulateWithoutPrint') }}
+                </el-button>
+              </el-popover>
+            </el-card>
+          </el-col>
+
           <!-- cancelSaleTransaction -->
           <el-col v-if="allowsReturnOrder" :span="size" style="padding-left: 12px;padding-right: 12px;padding-bottom: 10px;">
             <el-card shadow="hover" style="height: 100px">
@@ -1070,6 +1146,8 @@ export default {
     return {
       activeName: '',
       processPos: '',
+      invoceNr: '',
+      visiblePrint: false,
       pin: '',
       isCreateNewSubstituteOrder: true,
       isAction: false,
@@ -2071,6 +2149,63 @@ export default {
           // close panel lef
           this.$store.commit('setProcessLoading', false)
           this.$store.commit('setShowPOSOptions', false)
+        })
+    },
+    closeSimulateWithoutPrint() {
+      this.invoceNr = ''
+      this.visiblePrint = false
+    },
+    simulateWithoutPrint() {
+      if (this.$store.getters.getProcessLoading) return
+      const orderUuid = this.currentOrder.uuid
+      const posUuid = this.currentPointOfSales.uuid
+      this.$store.dispatch('updateOrderPos', true)
+      this.$store.dispatch('updatePaymentPos', true)
+      this.$message({
+        type: 'info',
+        message: this.$t('notifications.processing'),
+        showClose: true
+      })
+      this.$store.commit('setProcessLoading', true)
+      this.$store.dispatch('processOrder', {
+      // processOrder({
+        posUuid,
+        orderUuid,
+        orderNr: this.invoceNr,
+        isOpenRefund: !isEmptyValue(this.$store.getters.getListRefundReference),
+        createPayments: false,
+        processwithoutPrinting: true,
+        payments: []
+      })
+        .then(response => {
+          this.$store.dispatch('printTicket', { posId: this.currentPointOfSales.id, orderId: this.currentOrder.id })
+          this.$store.dispatch('reloadOrder', response.uuid)
+            .then(() => {
+              if (this.IsAllowsPreviewDocument) this.printPreview()
+            })
+          this.$message({
+            type: 'success',
+            message: this.$t('notifications.completed'),
+            showClose: true
+          })
+        })
+        .catch(error => {
+          this.$message({
+            type: 'error',
+            message: error.message,
+            showClose: true
+          })
+        })
+        .finally(() => {
+          this.$store.dispatch('listOrdersFromServer', {
+            posUuid: this.currentPointOfSales.uuid
+          })
+          this.$store.dispatch('updateOrderPos', false)
+          this.$store.dispatch('updatePaymentPos', false)
+          // close panel lef
+          this.$store.commit('setProcessLoading', false)
+          this.$store.commit('setShowPOSOptions', false)
+          this.closeSimulateWithoutPrint()
         })
     },
     reverseSalesTransaction() {

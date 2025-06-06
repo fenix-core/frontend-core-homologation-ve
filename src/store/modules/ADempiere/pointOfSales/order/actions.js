@@ -472,44 +472,123 @@ export default {
     dispatch
   }, {
     posUuid,
+    orderNr,
+    payments,
+    orderUuid,
+    isOpenRefund,
+    createPayments,
+    processwithoutPrinting = false
+  }) {
+    return new Promise((resolve, reject) => {
+      const posId = getters.posAttributes.currentPointOfSales.id
+      const currentOrder = getters.posAttributes.currentPointOfSales.currentOrder
+      if (isEmptyValue(orderUuid)) {
+        orderUuid = currentOrder.uuid
+      }
+      if (processwithoutPrinting) {
+        dispatch('processWithoutPrint', {
+          posId,
+          posUuid,
+          orderNr,
+          payments,
+          orderUuid,
+          isOpenRefund,
+          createPayments,
+          id: currentOrder.id
+        })
+          .then(() => {
+            processOrder({
+              posUuid,
+              orderUuid,
+              isOpenRefund,
+              createPayments,
+              payments
+            })
+              .then(response => {
+                resolve(response)
+              })
+              .catch(error => {
+                showMessage({
+                  type: 'error',
+                  message: error.message,
+                  showClose: true
+                })
+                reject(error)
+              })
+          })
+          .catch(error => {
+            showMessage({
+              type: 'error',
+              message: error.message,
+              showClose: true
+            })
+            reject(error)
+          })
+          .finally(() => {
+            resolve()
+            return
+          })
+      } else {
+        dispatch('simulateProcessOrder', {
+          posId,
+          posUuid,
+          payments,
+          orderUuid,
+          isOpenRefund,
+          createPayments,
+          id: currentOrder.id
+        })
+          .then(() => {
+            processOrder({
+              posUuid,
+              orderUuid,
+              isOpenRefund,
+              createPayments,
+              payments
+            })
+              .then(response => {
+                resolve(response)
+              })
+              .catch(error => {
+                showMessage({
+                  type: 'error',
+                  message: error.message,
+                  showClose: true
+                })
+                reject(error)
+              })
+          })
+          .catch(error => {
+            showMessage({
+              type: 'error',
+              message: error.message,
+              showClose: true
+            })
+            reject(error)
+          })
+      }
+    })
+  },
+  simulateProcessOrder({
+    dispatch
+  }, {
+    id,
+    posId,
+    posUuid,
     orderUuid,
     isOpenRefund,
     createPayments,
     payments
   }) {
     return new Promise((resolve, reject) => {
-      const posId = getters.posAttributes.currentPointOfSales.id
-      dispatch('simulateProcessOrder', { posId })
-        .then(() => {
-          processOrder({
-            posUuid,
-            orderUuid,
-            isOpenRefund,
-            createPayments,
-            payments
-          })
-            .then(response => {
-              resolve(response)
-            })
-            .catch(error => {
-              showMessage({
-                type: 'error',
-                message: error.message,
-                showClose: true
-              })
-              reject(error)
-            })
-        })
-    })
-  },
-  simulateProcessOrder({
-    dispatch
-  }, {
-    posId
-  }) {
-    return new Promise((resolve, reject) => {
       simulateProcessOrder({
-        posId
+        id,
+        posId,
+        posUuid,
+        orderUuid,
+        isOpenRefund,
+        createPayments,
+        payments
       })
         .then(response => {
           resolve(response)
@@ -528,11 +607,25 @@ export default {
     getters,
     dispatch
   }, {
-    posId
+    id,
+    posId,
+    orderNr,
+    posUuid,
+    payments,
+    orderUuid,
+    isOpenRefund,
+    createPayments
   }) {
     return new Promise((resolve, reject) => {
       processWithoutPrint({
-        posId
+        id,
+        posId,
+        orderNr,
+        posUuid,
+        payments,
+        orderUuid,
+        isOpenRefund,
+        createPayments
       })
         .then(response => {
           resolve(response)

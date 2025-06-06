@@ -317,6 +317,7 @@ export default {
           ordersHistory: 'Orders History',
           generateImmediateInvoice: 'Generate Immediate Invoice',
           completePreparedOrder: 'Complete Prepared Order',
+          simulateWithoutPrint: 'Simulate Without Print',
           cancelSaleTransaction: 'Cancel Sale Transaction',
           createPos: 'Create Point of Sale Withdrawal',
           print: 'Print Document',
