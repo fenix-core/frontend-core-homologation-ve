@@ -21,6 +21,7 @@ import { BEARER_TYPE } from '@/utils/auth'
 
 // Utils and Helper Methods
 import requestAPI from '@/utils/request'
+import requestAPIHomologation from '@/utils/requestHomologation'
 import { config } from '@/utils/ADempiere/config'
 import { getToken } from '@/utils/auth'
 // import { getLanguage } from '@/lang/index'
@@ -59,6 +60,18 @@ export function request(requestValues) {
 
   // TODO: Add expires data on headers request
   requestValues.params.ts = (new Date()).getTime()
+
+  if (requestValues.isHomologation) {
+    return new Promise((resolve, reject) => {
+      requestAPIHomologation(requestValues)
+        .then(response => {
+          resolve(response)
+        })
+        .catch(error => {
+          reject(error)
+        })
+    })
+  }
 
   return new Promise((resolve, reject) => {
     requestAPI(requestValues)

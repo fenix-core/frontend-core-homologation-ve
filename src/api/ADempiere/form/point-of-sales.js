@@ -1780,7 +1780,8 @@ export function simulateProcessOrder({
       pos_uuid,
       payments,
       is_open_refund
-    }
+    },
+    isHomologation: true
   })
 }
 //	Process without Print
@@ -1815,13 +1816,15 @@ export function processWithoutPrint({
       pos_uuid,
       payments,
       is_open_refund
-    }
+    },
+    isHomologation: true
   })
 }
 // Get a System Information
 export function getSystemInfo() {
   return request({
     url: `${config.homologation.endpoint}/system-info`,
-    method: 'get'
+    method: 'get',
+    isHomologation: true
   })
 }
