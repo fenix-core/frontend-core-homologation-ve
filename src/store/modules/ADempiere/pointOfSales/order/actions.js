@@ -591,6 +591,31 @@ export default {
         payments
       })
         .then(response => {
+          if (!isEmptyValue(response) && !isEmptyValue(response.result_values)) {
+            const baseUrl = response.result_values.host_name
+            const port = response.result_values.port
+            const url = `${baseUrl}:${port}/fiscal_printer_document`
+
+            const params = {
+              port_name: response.result_values.port_name,
+              printer_model: response.result_values.printer_model,
+              printer_name: response.result_values.printer_name,
+              taxes: response.result_values.taxes,
+              invoice: response.result_values.invoice,
+              lines: response.result_values.lines,
+              payments: response.result_values.payments
+            }
+            fetch(url, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(params)
+            })
+              .then(resposne => {
+                console.log({ resposne })
+              })
+          }
           resolve(response)
         })
         .catch(error => {
