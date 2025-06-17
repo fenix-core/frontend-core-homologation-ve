@@ -59,7 +59,6 @@ export function request(requestValues) {
   // requestValues.params.language = getLanguage() || 'en_US'
 
   // TODO: Add expires data on headers request
-  requestValues.params.ts = (new Date()).getTime()
 
   if (requestValues.isHomologation) {
     return new Promise((resolve, reject) => {
@@ -72,6 +71,7 @@ export function request(requestValues) {
         })
     })
   }
+  requestValues.params.ts = (new Date()).getTime()
 
   return new Promise((resolve, reject) => {
     requestAPI(requestValues)

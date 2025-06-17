@@ -31,7 +31,8 @@ import {
   processOrder,
   simulateProcessOrder,
   processWithoutPrint,
-  getSystemInfo
+  getSystemInfo,
+  fiscalPrinter
 } from '@/api/ADempiere/form/point-of-sales.js'
 
 // utils and helper methods
@@ -595,28 +596,55 @@ export default {
             const baseUrl = response.result_values.host_name
             const port = response.result_values.port
             const url = `${baseUrl}:${port}/fiscal_printer_document`
+            const port_name = response.result_values.port_name
+            const printer_model = response.result_values.printer_model
+            const printer_name = response.result_values.printer_name
+            const taxes = response.result_values.taxes
+            const invoice = response.result_values.invoice
+            const lines = response.result_values.lines
+            const payments = response.result_values.payments
 
-            const params = {
-              port_name: response.result_values.port_name,
-              printer_model: response.result_values.printer_model,
-              printer_name: response.result_values.printer_name,
-              taxes: response.result_values.taxes,
-              invoice: response.result_values.invoice,
-              lines: response.result_values.lines,
-              payments: response.result_values.payments
-            }
-            fetch(url, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify(params)
+            fiscalPrinter({
+              url,
+              port_name,
+              printer_name,
+              printer_model,
+              // Order
+              payments,
+              invoice,
+              taxes,
+              lines
             })
-              .then(resposne => {
-                console.log({ resposne })
+              .then(response => {
+                console.log({ response })
+                if (!isEmptyValue(response.closing_no) && !isEmptyValue(response.document_no)) {
+                  dispatch('processWithoutPrint', {
+                    id,
+                    posId,
+                    posUuid,
+                    payments,
+                    printDate: response.print_date,
+                    serialNo: response.printer_no,
+                    closingNo: response.closing_no,
+                    orderUuid,
+                    documentNo: response.document_no,
+                    isOpenRefund,
+                    createPayments
+                  })
+                    .finally(() => {
+                      resolve(response)
+                    })
+                }
+              })
+              .catch(error => {
+                reject(error)
+                showMessage({
+                  type: 'error',
+                  message: error.message,
+                  showClose: true
+                })
               })
           }
-          resolve(response)
         })
         .catch(error => {
           showMessage({
@@ -634,10 +662,13 @@ export default {
   }, {
     id,
     posId,
-    orderNr,
     posUuid,
     payments,
+    serialNo,
+    printDate,
     orderUuid,
+    closingNo,
+    documentNo,
     isOpenRefund,
     createPayments
   }) {
@@ -645,10 +676,13 @@ export default {
       processWithoutPrint({
         id,
         posId,
-        orderNr,
         posUuid,
         payments,
+        printDate,
+        serialNo,
         orderUuid,
+        closingNo,
+        documentNo,
         isOpenRefund,
         createPayments
       })

@@ -164,12 +164,11 @@
               </p>
             </el-card>
           </el-col> -->
-          <el-col v-if="!isEmptyValue(currentOrder.uuid)" :span="size" style="padding-left: 12px;padding-right: 12px;padding-bottom: 10px;">
+          <el-col v-if="!isEmptyValue(currentOrder.uuid) && isAllowsPrintFiscalDocument" :span="size" style="padding-left: 12px;padding-right: 12px;padding-bottom: 10px;">
             <el-card shadow="hover" style="height: 100px">
               <el-popover
                 v-model="visiblePrint"
-                placement="top"
-                width="450"
+                placement="left"
               >
                 <el-row v-if="!isLoadingReverse" :gutter="24" class="container-reverse">
                   <el-col :span="24" class="container-reverse">
@@ -179,13 +178,47 @@
                       </b>
                     </p>
                   </el-col>
-                  <el-col :span="24">
-                    {{ isEmptyValue(invoceNr) }}
-                    <el-input
-                      v-model="invoceNr"
-                      :placeholder="$t('form.pos.collect.orderNr')"
-                      @change="simulateWithoutPrint()"
-                    />
+                  <el-col :span="8">
+                    <el-form
+                      label-position="top"
+                      label-width="10px"
+                      @submit.native.prevent="notSubmitForm"
+                    >
+                      <el-form-item :label="$t('form.pos.optionsPoinSales.salesOrder.invoiceNumber')">
+                        <el-input
+                          v-model="invoiceNumber"
+                          :placeholder="$t('form.pos.optionsPoinSales.salesOrder.invoiceNumber')"
+                        />
+                      </el-form-item>
+                    </el-form>
+                  </el-col>
+                  <el-col :span="8">
+                    <el-form
+                      label-position="top"
+                      label-width="10px"
+                      @submit.native.prevent="notSubmitForm"
+                    >
+                      <el-form-item :label="$t('form.pos.optionsPoinSales.salesOrder.serialNumber')">
+                        <el-input
+                          v-model="serialNumber"
+                          :placeholder="$t('form.pos.optionsPoinSales.salesOrder.serialNumber')"
+                        />
+                      </el-form-item>
+                    </el-form>
+                  </el-col>
+                  <el-col :span="8">
+                    <el-form
+                      label-position="top"
+                      label-width="10px"
+                      @submit.native.prevent="notSubmitForm"
+                    >
+                      <el-form-item :label="$t('form.pos.optionsPoinSales.salesOrder.zNumber')">
+                        <el-input
+                          v-model="zNumber"
+                          :placeholder="$t('form.pos.optionsPoinSales.salesOrder.zNumber')"
+                        />
+                      </el-form-item>
+                    </el-form>
                   </el-col>
                   <el-col :span="24">
                     <samp class="spam-button">
@@ -199,7 +232,7 @@
                         type="primary"
                         style="background: #46a6ff;border-color: #46a6ff;background-color: #46a6ff;"
                         icon="el-icon-check"
-                        :disabled="isEmptyValue(invoceNr)"
+                        :disabled="validateWithoutPrint"
                         @click="simulateWithoutPrint()"
                       />
                     </samp>
@@ -1146,7 +1179,9 @@ export default {
     return {
       activeName: '',
       processPos: '',
-      invoceNr: '',
+      invoiceNumber: '',
+      serialNumber: '',
+      zNumber: '',
       visiblePrint: false,
       pin: '',
       isCreateNewSubstituteOrder: true,
@@ -1394,6 +1429,9 @@ export default {
     isAllowsPrintDocument() {
       return this.currentPointOfSales.isAllowsPrintDocument
     },
+    isAllowsPrintFiscalDocument() {
+      return this.currentPointOfSales.isAllowsPrintFiscalDocument
+    },
     IsAllowsPreviewDocument() {
       return this.currentPointOfSales.isAllowsPreviewDocument
     },
@@ -1595,6 +1633,9 @@ export default {
     },
     isAllowsModifyDiscount() {
       return this.$store.getters.posAttributes.currentPointOfSales.isAllowsModifyDiscount
+    },
+    validateWithoutPrint() {
+      return this.isEmptyValue(this.invoiceNumber) || this.isEmptyValue(this.serialNumber) || this.isEmptyValue(this.zNumber)
     }
   },
 
@@ -2152,7 +2193,9 @@ export default {
         })
     },
     closeSimulateWithoutPrint() {
-      this.invoceNr = ''
+      this.invoiceNumber = ''
+      this.serialNumber = ''
+      this.zNumber = ''
       this.visiblePrint = false
     },
     simulateWithoutPrint() {
@@ -2171,7 +2214,9 @@ export default {
       // processOrder({
         posUuid,
         orderUuid,
-        orderNr: this.invoceNr,
+        orderNr: this.invoiceNumber,
+        serialNo: this.serialNumber,
+        closingNo: this.zNumber,
         isOpenRefund: !isEmptyValue(this.$store.getters.getListRefundReference),
         createPayments: false,
         processwithoutPrinting: true,

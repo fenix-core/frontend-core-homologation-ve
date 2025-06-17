@@ -1791,6 +1791,10 @@ export function processWithoutPrint({
   orderNr,
   pos_uuid,
   payments,
+  serialNo,
+  printDate,
+  closingNo,
+  documentNo,
   is_open_refund
 }) {
   if (!isEmptyValue(payments)) {
@@ -1815,7 +1819,11 @@ export function processWithoutPrint({
       orderNr,
       pos_uuid,
       payments,
-      is_open_refund
+      is_open_refund,
+      print_date: printDate,
+      fiscal_document_no: documentNo,
+      fiscal_printer_serial_no: serialNo,
+      closing_no: closingNo
     },
     isHomologation: true
   })
@@ -1825,6 +1833,34 @@ export function getSystemInfo() {
   return request({
     url: `${config.homologation.endpoint}/system-info`,
     method: 'get',
+    isHomologation: true
+  })
+}
+
+export function fiscalPrinter({
+  url,
+  port_name,
+  printer_name,
+  printer_model,
+  // Order
+  payments,
+  invoice,
+  taxes,
+  lines
+}) {
+  return request({
+    url,
+    method: 'post',
+    data: {
+      port_name,
+      printer_name,
+      printer_model,
+      // Order
+      payments,
+      invoice,
+      taxes,
+      lines
+    },
     isHomologation: true
   })
 }

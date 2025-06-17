@@ -126,8 +126,7 @@ dictionaryService.interceptors.response.use(
    * You can also judge the status by HTTP Status Code
    */
   response => {
-    const res = response.data
-    return res
+    return response
   },
   error => {
     console.log('err' + error) // for debug
