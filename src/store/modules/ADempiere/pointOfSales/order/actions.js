@@ -595,7 +595,12 @@ export default {
           if (!isEmptyValue(response) && !isEmptyValue(response.result_values)) {
             const baseUrl = response.result_values.host_name
             const port = response.result_values.port
-            const url = `${baseUrl}:${port}/fiscal_printer_document`
+            let url = `${baseUrl}:${port}/fiscal_printer_document`
+            const regex = /^https?:\/\//
+
+            if (!regex.test(url)) {
+              url = `http://${baseUrl}:${port}/fiscal_printer_document`
+            }
             const port_name = response.result_values.port_name
             const printer_model = response.result_values.printer_model
             const printer_name = response.result_values.printer_name

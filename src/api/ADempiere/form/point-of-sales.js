@@ -1849,7 +1849,7 @@ export function fiscalPrinter({
   lines
 }) {
   return request({
-    url,
+    baseURL: url,
     method: 'post',
     data: {
       port_name,
