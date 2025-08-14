@@ -1121,7 +1121,7 @@ import {
   withdrawal,
   createNewReturnOrder,
   deleteOrder,
-  reverseSales,
+  // reverseSales,
   copyOrder
   // processOrder
 } from '@/api/ADempiere/form/point-of-sales.js'
@@ -2263,48 +2263,38 @@ export default {
         id: this.currentOrder.id
       })
         .then(response => {
-          reverseSales({
-            posUuid: this.currentPointOfSales.uuid,
-            orderUuid: this.currentOrder.uuid,
-            description: this.messageReverseSales
-          })
-            .then(response => {
-              this.$store.dispatch('printTicket', { posId: this.currentPointOfSales.id, orderId: response.id })
-              this.$store.dispatch('reloadOrder', response.uuid)
-                .then(() => {
-                  if (this.IsAllowsPreviewDocument) this.printPreview()
-                })
-              this.$store.dispatch('setCurrentPOS', this.currentPointOfSales)
-              // this.clearOrder()
-              this.summaryReverseOrder = {
-                type: 'success',
-                title: this.$t('form.pos.optionsPoinSales.salesOrder.cancelSaleTransaction'),
-                documentNo: response.document_no
-              }
+          this.$store.dispatch('printTicket', { posId: this.currentPointOfSales.id, orderId: response.id })
+          this.$store.dispatch('reloadOrder', response.uuid)
+            .then(() => {
+              if (this.IsAllowsPreviewDocument) this.printPreview()
             })
-            .catch(error => {
-              console.error(error.message)
-              this.showReverseOrder = true
-              this.summaryReverseOrder = {
-                type: 'error',
-                title: this.$t('form.pos.optionsPoinSales.salesOrder.cancelSaleTransaction'),
-                documentNo: this.currentOrder.documentNo
-              }
-              this.$message({
-                type: 'error',
-                message: error.message,
-                showClose: true
-              })
-            })
-            .finally(() => {
-              this.showReverseOrder = true
-              this.isLoadingReverse = false
-              this.visibleReverse = false
-              this.messageReverseSales = ''
-            })
+          this.$store.dispatch('setCurrentPOS', this.currentPointOfSales)
+          // this.clearOrder()
+          this.summaryReverseOrder = {
+            type: 'success',
+            title: this.$t('form.pos.optionsPoinSales.salesOrder.cancelSaleTransaction'),
+            documentNo: response.document_no
+          }
         })
-        .catch(() => {
-          this.isLoadingReverse = true
+        .catch(error => {
+          console.error(error.message)
+          this.showReverseOrder = true
+          this.summaryReverseOrder = {
+            type: 'error',
+            title: this.$t('form.pos.optionsPoinSales.salesOrder.cancelSaleTransaction'),
+            documentNo: this.currentOrder.documentNo
+          }
+          this.$message({
+            type: 'error',
+            message: error.message,
+            showClose: true
+          })
+        })
+        .finally(() => {
+          this.showReverseOrder = true
+          this.isLoadingReverse = false
+          this.visibleReverse = false
+          this.messageReverseSales = ''
         })
     },
     withdrawal() {

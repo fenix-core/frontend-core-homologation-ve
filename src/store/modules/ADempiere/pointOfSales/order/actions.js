@@ -759,17 +759,21 @@ export default {
             const invoice = response.result_values.invoice
             const lines = response.result_values.lines
             const payments = response.result_values.payments
-            const params = { port_name, printer_model, printer_name, taxes, invoice, lines, payments }
-            fetch(url, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify(params)
+            // const params = { port_name, printer_model, printer_name, taxes, invoice, lines, payments }
+            fiscalPrinter({
+              url,
+              port_name,
+              printer_name,
+              printer_model,
+              // Order
+              payments,
+              invoice,
+              taxes,
+              lines
             })
               .then(response => {
                 if (!isEmptyValue(response.closing_no) && !isEmptyValue(response.document_no)) {
-                  dispatch('processWithoutPrint', {
+                  dispatch('processReverseSalesWithout', {
                     id,
                     posId,
                     posUuid,
@@ -782,8 +786,8 @@ export default {
                     isOpenRefund,
                     createPayments
                   })
-                    .finally(() => {
-                      resolve(response)
+                    .then(responseReverseSalesWithout => {
+                      resolve(responseReverseSalesWithout)
                     })
                 }
               })
