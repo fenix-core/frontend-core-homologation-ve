@@ -62,6 +62,7 @@ export function request(requestValues) {
 
   if (requestValues.isHomologation) {
     return new Promise((resolve, reject) => {
+      console.log({ requestValues })
       requestAPIHomologation(requestValues)
         .then(response => {
           resolve(response)
