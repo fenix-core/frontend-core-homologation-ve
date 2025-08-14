@@ -32,7 +32,8 @@ import {
   simulateProcessOrder,
   processWithoutPrint,
   getSystemInfo,
-  fiscalPrinter
+  simulateReverseSalesRequest,
+  processReverseSalesWithoutPrintRequest
 } from '@/api/ADempiere/form/point-of-sales.js'
 
 // utils and helper methods
@@ -608,20 +609,15 @@ export default {
             const invoice = response.result_values.invoice
             const lines = response.result_values.lines
             const payments = response.result_values.payments
-
-            fiscalPrinter({
-              url,
-              port_name,
-              printer_name,
-              printer_model,
-              // Order
-              payments,
-              invoice,
-              taxes,
-              lines
+            const params = { port_name, printer_model, printer_name, taxes, invoice, lines, payments }
+            fetch(url, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(params)
             })
               .then(response => {
-                console.log({ response })
                 if (!isEmptyValue(response.closing_no) && !isEmptyValue(response.document_no)) {
                   dispatch('processWithoutPrint', {
                     id,
@@ -652,9 +648,16 @@ export default {
           }
         })
         .catch(error => {
+          let message = error.message
+          if (
+            !isEmptyValue(error.response) &&
+            !isEmptyValue(error.response.data)
+          ) {
+            message = error.response.data.message
+          }
           showMessage({
+            message,
             type: 'error',
-            message: error.message,
             showClose: true
           })
           reject(error)
@@ -695,9 +698,162 @@ export default {
           resolve(response)
         })
         .catch(error => {
+          let message = error.message
+          if (
+            !isEmptyValue(error.response) &&
+            !isEmptyValue(error.response.data)
+          ) {
+            message = error.response.data.message
+          }
           showMessage({
+            message,
             type: 'error',
-            message: error.message,
+            showClose: true
+          })
+          reject(error)
+        })
+    })
+  },
+  simulateReverseSales({
+    dispatch
+  }, {
+    id,
+    posId,
+    posUuid,
+    orderUuid,
+    isOpenRefund,
+    createPayments,
+    description,
+    payments
+  }) {
+    return new Promise((resolve, reject) => {
+      simulateReverseSalesRequest({
+        id,
+        posId,
+        posUuid,
+        orderUuid,
+        isOpenRefund,
+        createPayments,
+        description,
+        payments
+      })
+        .then(response => {
+          if (!isEmptyValue(response) && !isEmptyValue(response.result_values)) {
+            const baseUrl = response.result_values.host_name
+            const port = response.result_values.port
+            let url = `${baseUrl}:${port}/fiscal_printer_document`
+            const regex = /^https?:\/\//
+
+            if (!regex.test(url)) {
+              url = `http://${baseUrl}:${port}/fiscal_printer_document`
+            }
+            const port_name = response.result_values.port_name
+            const printer_model = response.result_values.printer_model
+            const printer_name = response.result_values.printer_name
+            const taxes = response.result_values.taxes
+            const invoice = response.result_values.invoice
+            const lines = response.result_values.lines
+            const payments = response.result_values.payments
+            const params = { port_name, printer_model, printer_name, taxes, invoice, lines, payments }
+            fetch(url, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(params)
+            })
+              .then(response => {
+                if (!isEmptyValue(response.closing_no) && !isEmptyValue(response.document_no)) {
+                  dispatch('processWithoutPrint', {
+                    id,
+                    posId,
+                    posUuid,
+                    payments,
+                    printDate: response.print_date,
+                    serialNo: response.printer_no,
+                    closingNo: response.closing_no,
+                    orderUuid,
+                    documentNo: response.document_no,
+                    isOpenRefund,
+                    createPayments
+                  })
+                    .finally(() => {
+                      resolve(response)
+                    })
+                }
+              })
+              .catch(error => {
+                reject(error)
+                showMessage({
+                  type: 'error',
+                  message: error.message,
+                  showClose: true
+                })
+              })
+          }
+        })
+        .catch(error => {
+          console.log({ error })
+          let message = error.message
+          if (
+            !isEmptyValue(error.response) &&
+            !isEmptyValue(error.response.data)
+          ) {
+            message = error.response.data.message
+          }
+          showMessage({
+            message,
+            type: 'error',
+            showClose: true
+          })
+          reject(error)
+        })
+    })
+  },
+  processReverseSalesWithout({
+    getters,
+    dispatch
+  }, {
+    id,
+    posId,
+    posUuid,
+    payments,
+    serialNo,
+    printDate,
+    orderUuid,
+    closingNo,
+    documentNo,
+    isOpenRefund,
+    createPayments
+  }) {
+    return new Promise((resolve, reject) => {
+      processReverseSalesWithoutPrintRequest({
+        id,
+        posId,
+        posUuid,
+        payments,
+        printDate,
+        serialNo,
+        orderUuid,
+        closingNo,
+        documentNo,
+        isOpenRefund,
+        createPayments
+      })
+        .then(response => {
+          resolve(response)
+        })
+        .catch(error => {
+          let message = error.message
+          if (
+            !isEmptyValue(error.response) &&
+            !isEmptyValue(error.response.data)
+          ) {
+            message = error.response.data.message
+          }
+          showMessage({
+            message,
+            type: 'error',
             showClose: true
           })
           reject(error)

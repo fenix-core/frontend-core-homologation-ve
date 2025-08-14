@@ -2255,44 +2255,56 @@ export default {
     },
     reverseSalesTransaction() {
       this.isLoadingReverse = true
-      reverseSales({
+      this.$store.dispatch('simulateReverseSales', {
+        posId: this.currentPointOfSales.id,
         posUuid: this.currentPointOfSales.uuid,
+        description: this.messageReverseSales,
         orderUuid: this.currentOrder.uuid,
-        description: this.messageReverseSales
+        id: this.currentOrder.id
       })
         .then(response => {
-          this.$store.dispatch('printTicket', { posId: this.currentPointOfSales.id, orderId: response.id })
-          this.$store.dispatch('reloadOrder', response.uuid)
-            .then(() => {
-              if (this.IsAllowsPreviewDocument) this.printPreview()
-            })
-          this.$store.dispatch('setCurrentPOS', this.currentPointOfSales)
-          // this.clearOrder()
-          this.summaryReverseOrder = {
-            type: 'success',
-            title: this.$t('form.pos.optionsPoinSales.salesOrder.cancelSaleTransaction'),
-            documentNo: response.document_no
-          }
-        })
-        .catch(error => {
-          console.error(error.message)
-          this.showReverseOrder = true
-          this.summaryReverseOrder = {
-            type: 'error',
-            title: this.$t('form.pos.optionsPoinSales.salesOrder.cancelSaleTransaction'),
-            documentNo: this.currentOrder.documentNo
-          }
-          this.$message({
-            type: 'error',
-            message: error.message,
-            showClose: true
+          reverseSales({
+            posUuid: this.currentPointOfSales.uuid,
+            orderUuid: this.currentOrder.uuid,
+            description: this.messageReverseSales
           })
+            .then(response => {
+              this.$store.dispatch('printTicket', { posId: this.currentPointOfSales.id, orderId: response.id })
+              this.$store.dispatch('reloadOrder', response.uuid)
+                .then(() => {
+                  if (this.IsAllowsPreviewDocument) this.printPreview()
+                })
+              this.$store.dispatch('setCurrentPOS', this.currentPointOfSales)
+              // this.clearOrder()
+              this.summaryReverseOrder = {
+                type: 'success',
+                title: this.$t('form.pos.optionsPoinSales.salesOrder.cancelSaleTransaction'),
+                documentNo: response.document_no
+              }
+            })
+            .catch(error => {
+              console.error(error.message)
+              this.showReverseOrder = true
+              this.summaryReverseOrder = {
+                type: 'error',
+                title: this.$t('form.pos.optionsPoinSales.salesOrder.cancelSaleTransaction'),
+                documentNo: this.currentOrder.documentNo
+              }
+              this.$message({
+                type: 'error',
+                message: error.message,
+                showClose: true
+              })
+            })
+            .finally(() => {
+              this.showReverseOrder = true
+              this.isLoadingReverse = false
+              this.visibleReverse = false
+              this.messageReverseSales = ''
+            })
         })
-        .finally(() => {
-          this.showReverseOrder = true
-          this.isLoadingReverse = false
-          this.visibleReverse = false
-          this.messageReverseSales = ''
+        .catch(() => {
+          this.isLoadingReverse = true
         })
     },
     withdrawal() {
@@ -2723,8 +2735,6 @@ export default {
   .dialog-seller {
     overflow: hidden;
   }
-</style>
-<style>
   .el-textarea__inner:hover {
     background-color: #FFFFFF!important;
   }

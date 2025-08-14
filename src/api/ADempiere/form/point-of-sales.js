@@ -1864,3 +1864,73 @@ export function fiscalPrinter({
     isHomologation: true
   })
 }
+
+export function simulateReverseSalesRequest({
+  id,
+  posId,
+  pos_uuid,
+  payments,
+  description,
+  is_open_refund
+}) {
+  if (!isEmptyValue(payments)) {
+    payments = payments.map(parameter => {
+      return {
+        invoice_uuid: parameter.invoiceUuid,
+        bank_uuid: parameter.bankUuid,
+        reference_no: parameter.referenceNo,
+        description: parameter.description,
+        amount: String(parameter.amount),
+        tender_type_code: parameter.tenderTypeCode,
+        payment_date: parameter.paymentDate,
+        currency_uid: parameter.currencyUuid
+      }
+    })
+  }
+  return request({
+    url: `${config.homologation.endpoint}/${posId}/orders/${id}/reverse/simulate`,
+    method: 'put',
+    data: {
+      posId,
+      pos_uuid,
+      payments,
+      description,
+      is_open_refund
+    },
+    isHomologation: true
+  })
+}
+
+export function processReverseSalesWithoutPrintRequest({
+  id,
+  posId,
+  pos_uuid,
+  payments,
+  is_open_refund
+}) {
+  if (!isEmptyValue(payments)) {
+    payments = payments.map(parameter => {
+      return {
+        invoice_uuid: parameter.invoiceUuid,
+        bank_uuid: parameter.bankUuid,
+        reference_no: parameter.referenceNo,
+        description: parameter.description,
+        amount: String(parameter.amount),
+        tender_type_code: parameter.tenderTypeCode,
+        payment_date: parameter.paymentDate,
+        currency_uid: parameter.currencyUuid
+      }
+    })
+  }
+  return request({
+    url: `${config.homologation.endpoint}/${posId}/orders/${id}/reverse`,
+    method: 'put',
+    data: {
+      posId,
+      pos_uuid,
+      payments,
+      is_open_refund
+    },
+    isHomologation: true
+  })
+}
