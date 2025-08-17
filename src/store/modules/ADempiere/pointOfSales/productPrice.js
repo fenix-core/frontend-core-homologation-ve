@@ -51,7 +51,10 @@ const listProductPrice = {
       isShowPopoverMenu: false // with menu
     },
     searchProduct: '',
-    showProductSearch: false
+    showProductSearch: false,
+    showReportX: false,
+    showReportZ: false,
+    showReportSetup: false
   },
 
   mutations: {
@@ -76,6 +79,15 @@ const listProductPrice = {
     },
     setShowProductSearch(state, show) {
       state.showProductSearch = show
+    },
+    setShowReportX(state, show) {
+      state.showReportX = show
+    },
+    setShowReportZ(state, show) {
+      state.showReportZ = show
+    },
+    setShowReportSetup(state, show) {
+      state.showReportSetup = show
     }
   },
 
@@ -186,6 +198,15 @@ const listProductPrice = {
     },
     getShowProductSearch: (state) => {
       return state.showProductSearch
+    },
+    getShowReportX: (state) => {
+      return state.showReportX
+    },
+    getShowReportZ: (state) => {
+      return state.showReportZ
+    },
+    getShowReportSetup: (state) => {
+      return state.showReportSetup
     }
   }
 

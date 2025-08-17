@@ -139,6 +139,97 @@
         </div>
       </el-card>
     </el-col>
+
+    <!-- Print Report X -->
+    <el-col :span="size" style="padding-left: 12px;padding-right: 12px;padding-bottom: 10px;">
+      <el-card shadow="hover" style="height: 100px">
+        <div
+          plain
+          type="text"
+          @click="showPanelReportX()"
+        >
+          <p style="text-align: center;font-size: 14px;color: black;">
+            <svg-icon icon-class="product-search" style="font-size: 17px;" />
+            <br>
+            {{ $t('form.pos.optionsPoinSales.generalOptions.reportx') }}
+          </p>
+        </div>
+      </el-card>
+    </el-col>
+
+    <!-- Print Report Z -->
+    <el-col :span="size" style="padding-left: 12px;padding-right: 12px;padding-bottom: 10px;">
+      <el-card shadow="hover" style="height: 100px">
+        <div
+          plain
+          type="text"
+          @click="showPanelReportZ()"
+        >
+          <p style="text-align: center;font-size: 14px;color: black;">
+            <svg-icon icon-class="product-search" style="font-size: 17px;" />
+            <br>
+            {{ $t('form.pos.optionsPoinSales.generalOptions.reportz') }}
+          </p>
+        </div>
+      </el-card>
+    </el-col>
+
+    <!-- Print Setup -->
+    <el-col :span="size" style="padding-left: 12px;padding-right: 12px;padding-bottom: 10px;">
+      <el-card shadow="hover" style="height: 100px">
+        <div
+          plain
+          type="text"
+          @click="showPanelSetup()"
+        >
+          <p style="text-align: center;font-size: 14px;color: black;">
+            <svg-icon icon-class="product-search" style="font-size: 17px;" />
+            <br>
+            {{ $t('form.pos.optionsPoinSales.generalOptions.setup') }}
+          </p>
+        </div>
+      </el-card>
+    </el-col>
+
+    <!-- Print Report X -->
+    <el-dialog
+      :title="$t('form.pos.optionsPoinSales.generalOptions.reportx')"
+      :visible.sync="showReportX"
+      :center="true"
+      :modal="false"
+      width="85%"
+    >
+      <print-report-x
+        :height="'60vh'"
+      />
+    </el-dialog>
+
+    <!-- Print Report Z -->
+    <el-dialog
+      :title="$t('form.pos.optionsPoinSales.generalOptions.reportz')"
+      :visible.sync="showReportZ"
+      :center="true"
+      :modal="false"
+      width="85%"
+    >
+      <print-report-z
+        :height="'60vh'"
+      />
+    </el-dialog>
+
+    <!-- Print Setup -->
+    <el-dialog
+      :title="$t('form.pos.optionsPoinSales.generalOptions.setup')"
+      :visible.sync="showReportSetup"
+      :center="true"
+      :modal="false"
+      width="85%"
+    >
+      <print-report-setup
+        :height="'60vh'"
+      />
+    </el-dialog>
+
     <el-dialog
       :title="$t('form.pos.optionsPoinSales.generalOptions.productQuery')"
       :visible.sync="showProductSearch"
@@ -159,6 +250,9 @@ import { defineComponent, computed } from '@vue/composition-api'
 // components and mixins
 import ListProductPrice from '@/components/ADempiere/Form/VPOS/ProductInfo/productList'
 import ListProductSearch from '@/components/ADempiere/Form/ProductInfo/productList'
+import PrintReportZ from '@/components/ADempiere/Form/VPOS/Options/Homologacion/PrintReportZ.vue'
+import PrintReportX from '@/components/ADempiere/Form/VPOS/Options/Homologacion/PrintReportX.vue'
+import PrintReportSetup from '@/components/ADempiere/Form/VPOS/Options/Homologacion/PrintReportSetup.vue'
 // /opt/Deveploment/frontend-core/src/themes/default/components/ADempiere/Form/ProductInfo/productList.vue
 
 export default defineComponent({
@@ -166,7 +260,10 @@ export default defineComponent({
 
   components: {
     ListProductPrice,
-    ListProductSearch
+    ListProductSearch,
+    PrintReportSetup,
+    PrintReportX,
+    PrintReportZ
   },
 
   props: {
@@ -185,8 +282,6 @@ export default defineComponent({
         root.$store.commit('setShowProductSearch', isShowed)
       }
     })
-
-    // const showProductSearch = ref(false)
 
     const currentPointOfSales = computed(() => {
       return root.$store.getters.posAttributes.currentPointOfSales
@@ -257,7 +352,33 @@ export default defineComponent({
       }
     })
 
-    // TODO: Manage with mixin
+    const showReportX = computed({
+      get() {
+        return root.$store.getters.getShowReportX
+      },
+      set(value) {
+        root.$store.commit('setShowReportX', value)
+      }
+    })
+
+    const showReportZ = computed({
+      get() {
+        return root.$store.getters.getShowReportZ
+      },
+      set(value) {
+        root.$store.commit('setShowReportZ', value)
+      }
+    })
+
+    const showReportSetup = computed({
+      get() {
+        return root.$store.getters.getShowReportSetup
+      },
+      set(isShowed) {
+        root.$store.commit('setShowReportSetup', isShowed)
+      }
+    })
+
     const clearOrder = () => {
       root.$router.push({
         params: {
@@ -339,22 +460,53 @@ export default defineComponent({
       showProductSearch.value = !showProductSearch.value
     }
 
+    function showPanelReportX() {
+      showReportX.value = !showReportX.value
+      root.$store.dispatch('infoPrinter')
+        .catch(() => {
+          showReportX.value = false
+        })
+    }
+
+    function showPanelReportZ() {
+      showReportZ.value = !showReportZ.value
+      root.$store.dispatch('infoPrinter')
+        .catch(() => {
+          showReportX.value = false
+        })
+    }
+
+    function showPanelSetup() {
+      showReportSetup.value = !showReportSetup.value
+      root.$store.dispatch('infoPrinter')
+        .catch(() => {
+          showReportX.value = false
+        })
+    }
+
     return {
       // Ref
-      showProductSearch,
       // computeds
+      size,
       adviserPin,
       blockOption,
-      isShowProductsPriceList,
       listPointOfSales,
+      showProductSearch,
       priceListPointOfSales,
-      size,
+      isShowProductsPriceList,
       warehousesListPointOfSales,
+      // Homologations
+      showReportX,
+      showReportZ,
+      showReportSetup,
       // methods
       show,
       changePos,
       changePriceList,
-      changeWarehouse
+      changeWarehouse,
+      showPanelReportX,
+      showPanelReportZ,
+      showPanelSetup
     }
   }
 

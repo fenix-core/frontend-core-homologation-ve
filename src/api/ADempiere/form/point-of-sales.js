@@ -1842,6 +1842,9 @@ export function fiscalPrinter({
   port_name,
   printer_name,
   printer_model,
+  type,
+  document_type,
+  firmware_version,
   // Order
   payments,
   invoice,
@@ -1855,6 +1858,9 @@ export function fiscalPrinter({
       port_name,
       printer_name,
       printer_model,
+      type,
+      document_type,
+      firmware_version,
       // Order
       payments,
       invoice,
@@ -1931,6 +1937,16 @@ export function processReverseSalesWithoutPrintRequest({
       payments,
       is_open_refund
     },
+    isHomologation: true
+  })
+}
+
+export function requestPirnterDeviceInfo({
+  posId
+}) {
+  return request({
+    url: `${config.homologation.endpoint}/${posId}/printer`,
+    method: 'get',
     isHomologation: true
   })
 }
