@@ -67,7 +67,8 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
         <el-button
           type="primary"
           icon="el-icon-check"
-          :disabled="isEmptyValue(infoPrinter)"
+          :loading="isLoadingCheck"
+          :disabled="isEmptyValue(infoPrinter) && isLoadingCheck"
           style="background: #46a6ff;border-color: #46a6ff;background-color: #46a6ff;"
           @click="printSetup()"
         />
@@ -89,15 +90,13 @@ import {
   ref
 } from '@vue/composition-api'
 import store from '@/store'
-// import lang from '@/lang'
+import lang from '@/lang'
 
 // Components
 import LoadingView from '@/components/ADempiere/LoadingView/index.vue'
 
 // Utils and Helper Methods
-// import { formatPrice, formatDate } from '@/utils/ADempiere/valueFormat.js'
-// import { formatQuantity } from '@/utils/ADempiere/formatValue/numberFormat'
-// import { isEmptyValue } from '@/utils/ADempiere'
+import { showMessage } from '@/utils/ADempiere/notification.js'
 
 export default defineComponent({
   name: 'PrintReportSetup',
@@ -106,6 +105,7 @@ export default defineComponent({
   },
   setup(props) {
     // Ref
+    const isLoadingCheck = ref(false)
     const selectOptions = ref('')
     const optionsSetups = ref([
       {
@@ -187,27 +187,43 @@ export default defineComponent({
     }
 
     function printSetup() {
-      const { host_name, host_port, printer_name, printer_model, serial_no } = infoPrinter.value
+      const { host_name, host_port, printer_port, name, printer_model, serial_no } = infoPrinter.value
       const url = `http://${host_name}:${host_port}/fiscal_printer_setup`
-      console.log({
-        currentVersion: currentVersion.value,
-        selectOptions: selectOptions.value
+      isLoadingCheck.value = true
+      const paramsPrint = {
+        url,
+        port_name: printer_port,
+        printer_name: name,
+        printer_model: printer_model.value,
+        serial_no,
+        type: selectOptions.value
+      }
+      if (selectOptions.value === 'firmware_set_values') {
+        paramsPrint.firmware_version = currentVersion.value
+      }
+      showMessage({
+        message: lang.t('form.pos.optionsPoinSales.generalOptions.runningProcess'),
+        type: 'info'
       })
       store.dispatch('printReport', {
         url,
-        port_name: host_port,
-        printer_name,
-        printer_model: printer_model.name,
+        port_name: printer_port,
+        printer_name: name,
+        printer_model: printer_model.value,
         serial_no,
-        type: selectOptions.value,
-        firmware_version: selectOptions.value === 'firmware_set_values' ? currentVersion.value : null
+        type: selectOptions.value
       })
+        .finally(() => {
+          isLoadingCheck.value = false
+          close()
+        })
     }
 
     // loadInfoPrint()
 
     return {
       // ref
+      isLoadingCheck,
       selectOptions,
       optionsSetups,
       currentVersion,

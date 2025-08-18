@@ -1932,7 +1932,7 @@ export function processReverseSalesWithoutPrintRequest({
     url: `${config.homologation.endpoint}/${posId}/orders/${id}/reverse`,
     method: 'put',
     data: {
-      posId,
+      pos_id: posId,
       pos_uuid,
       payments,
       is_open_refund
@@ -1945,8 +1945,33 @@ export function requestPirnterDeviceInfo({
   posId
 }) {
   return request({
-    url: `${config.homologation.endpoint}/${posId}/printer`,
+    url: `${config.homologation.endpoint}/${posId}/printers`,
     method: 'get',
+    isHomologation: true
+  })
+}
+
+export function createPrinterError({
+  posId,
+  message,
+  printerId,
+  fiscalDocumentNo,
+  fiscalDocumentUuid,
+  lastFiscalInvoiceNo,
+  lastFiscalCreditMemoNo
+}) {
+  return request({
+    url: `${config.homologation.endpoint}/${posId}/printers/${printerId}/error`,
+    method: 'post',
+    data: {
+      message,
+      pos_id: posId,
+      printer_id: printerId,
+      fiscal_document_no: fiscalDocumentNo,
+      fiscal_document_uuid: fiscalDocumentUuid,
+      last_fiscal_invoice_no: lastFiscalInvoiceNo,
+      last_fiscal_credit_memo_no: lastFiscalCreditMemoNo
+    },
     isHomologation: true
   })
 }

@@ -21,8 +21,10 @@
 // API Request Methods
 import {
   fiscalPrinter,
+  createPrinterError,
   requestPirnterDeviceInfo
 } from '@/api/ADempiere/form/point-of-sales.js'
+import { isEmptyValue } from '@/utils/ADempiere'
 
 // utils and helper methods
 // import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
@@ -76,9 +78,10 @@ const homologacion = {
           })
       })
     },
-    printReport({ commit }, {
+    printReport({ commit, dispatch, getters }, {
       url,
       type,
+      posId,
       serial_no,
       port_name,
       printer_name,
@@ -87,15 +90,73 @@ const homologacion = {
       firmware_version
     }) {
       return new Promise(resolve => {
+        if (isEmptyValue(posId)) {
+          posId = getters.posAttributes.currentPointOfSales.id
+        }
+        const infoPrinter = getters.getInfoPrinter
         fiscalPrinter({
           url,
           type,
-          serial_no,
+          serial_no: infoPrinter.serial_no,
           port_name,
           printer_name,
           printer_model,
           document_type,
           firmware_version
+        })
+          .then(responsePrinter => {
+            dispatch('printerError', {
+              posId,
+              lastFiscalInvoiceNo: responsePrinter.last_invoice_no,
+              lastFiscalCreditMemoNo: responsePrinter.last_credit_memo_no,
+              message: 'Ok',
+              fiscalDocumentNo: responsePrinter.document_no,
+              fiscalDocumentUuid: responsePrinter.document_uuid
+            })
+            showMessage({
+              type: 'success',
+              message: 'OK',
+              showClose: true
+            })
+          })
+          .catch(error => {
+            let message = error
+            if (!isEmptyValue(error.message)) message = error.message
+            dispatch('printerError', {
+              posId,
+              message,
+              fiscalDocumentUuid: crypto.randomUUID()
+            })
+            showMessage({
+              type: 'error',
+              message: error.message,
+              showClose: true
+            })
+            resolve(error)
+          })
+      })
+    },
+    printerError({ commit, getters }, {
+      posId,
+      message,
+      printerId,
+      fiscalDocumentNo,
+      fiscalDocumentUuid,
+      lastFiscalInvoiceNo,
+      lastFiscalCreditMemoNo
+    }) {
+      return new Promise(resolve => {
+        if (isEmptyValue(printerId)) {
+          printerId = getters.getInfoPrinter.id
+        }
+        createPrinterError({
+          posId,
+          message,
+          printerId,
+          fiscalDocumentNo,
+          fiscalDocumentUuid,
+          lastFiscalInvoiceNo,
+          lastFiscalCreditMemoNo
         })
           .then(response => {
             console.log({ response })

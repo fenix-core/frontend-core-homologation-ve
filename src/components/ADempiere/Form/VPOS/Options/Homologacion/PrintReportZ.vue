@@ -32,7 +32,7 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
         <el-button
           type="primary"
           icon="el-icon-check"
-          :disabled="isEmptyValue(infoPrinter)"
+          :disabled="isEmptyValue(infoPrinter) && isLoadingCheck"
           style="background: #46a6ff;border-color: #46a6ff;background-color: #46a6ff;"
           @click="printReportX()"
         />
@@ -50,19 +50,17 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
 // api request methods
 import {
   defineComponent,
-  computed
-  // ref
+  computed,
+  ref
 } from '@vue/composition-api'
 import store from '@/store'
-// import lang from '@/lang'
+import lang from '@/lang'
 
 // Components
 import LoadingView from '@/components/ADempiere/LoadingView/index.vue'
 
 // Utils and Helper Methods
-// import { formatPrice, formatDate } from '@/utils/ADempiere/valueFormat.js'
-// import { formatQuantity } from '@/utils/ADempiere/formatValue/numberFormat'
-// import { isEmptyValue } from '@/utils/ADempiere'
+import { showMessage } from '@/utils/ADempiere/notification.js'
 
 export default defineComponent({
   name: 'PrintReportZ',
@@ -71,6 +69,7 @@ export default defineComponent({
   },
   setup(props) {
     // Ref
+    const isLoadingCheck = ref(false)
     // const isLoading = ref(false)
     const isLoading = computed(() => {
       return store.getters.getLoadingPrinter
@@ -94,22 +93,32 @@ export default defineComponent({
     }
 
     function printReportX() {
-      console.log({ infoPrinter: infoPrinter.value })
-      const { host_name, host_port, printer_name, printer_model, serial_no } = infoPrinter.value
+      const { host_name, host_port, printer_port, name, printer_model, serial_no } = infoPrinter.value
       const url = `http://${host_name}:${host_port}/fiscal_printer_report`
+      isLoadingCheck.value = true
+      showMessage({
+        message: lang.t('form.pos.optionsPoinSales.generalOptions.printLoadingReportZDay'),
+        type: 'info'
+      })
       store.dispatch('printReport', {
         url,
-        port_name: host_port,
-        printer_name,
-        printer_model: printer_model.name,
+        port_name: printer_port,
+        printer_name: name,
+        printer_model: printer_model.value,
         serial_no,
         document_type: 'z_report'
       })
+        .finally(() => {
+          isLoadingCheck.value = false
+          close()
+        })
     }
 
     // loadInfoPrint()
 
     return {
+      // Ref
+      isLoadingCheck,
       // Computed
       isLoading,
       infoPrinter,

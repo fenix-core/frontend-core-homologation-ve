@@ -110,6 +110,9 @@ export default {
           showClose: true
         })
       })
+      .finally(() => {
+        dispatch('infoPrinter')
+      })
   },
   listWarehousesFromServer({ commit }, posUuid) {
     listWarehouses({

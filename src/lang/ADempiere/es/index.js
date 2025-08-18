@@ -363,7 +363,10 @@ export default {
           reportz: 'Reporte Z',
           printReportXDay: 'Imprimir Reporte X del día',
           printReportZDay: 'Imprimir Reporte Z del día',
-          setup: 'Configuración'
+          printLoadingReportXDay: 'Imprimiendo el Reporte X del día',
+          printLoadingReportZDay: 'Imprimiendo el Reporte Z del día',
+          setup: 'Configuración',
+          runningProcess: 'Ejecutando Proceso'
         }
       },
       generalNotifications: {
