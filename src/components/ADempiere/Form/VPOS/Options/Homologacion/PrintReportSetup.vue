@@ -206,12 +206,7 @@ export default defineComponent({
         type: 'info'
       })
       store.dispatch('printReport', {
-        url,
-        port_name: printer_port,
-        printer_name: name,
-        printer_model: printer_model.value,
-        serial_no,
-        type: selectOptions.value
+        ...paramsPrint
       })
         .finally(() => {
           isLoadingCheck.value = false
