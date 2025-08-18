@@ -573,7 +573,8 @@ export default {
     })
   },
   simulateProcessOrder({
-    dispatch
+    dispatch,
+    getters
   }, {
     id,
     posId,
@@ -594,6 +595,7 @@ export default {
         payments
       })
         .then(response => {
+          console.log({ response })
           if (!isEmptyValue(response) && !isEmptyValue(response.result_values)) {
             const baseUrl = response.result_values.host_name
             const port = response.result_values.port
@@ -622,27 +624,51 @@ export default {
               taxes,
               lines
             })
-              .then(response => {
-                if (!isEmptyValue(response.closing_no) && !isEmptyValue(response.document_no)) {
+              .then(responsePrinter => {
+                const { result_values } = responsePrinter
+                console.log({ responsePrinter, result_values })
+                if (!isEmptyValue(responsePrinter.closing_no) && !isEmptyValue(responsePrinter.document_no)) {
                   dispatch('processWithoutPrint', {
                     id,
                     posId,
                     posUuid,
                     payments,
-                    printDate: response.print_date,
-                    serialNo: response.printer_no,
-                    closingNo: response.closing_no,
+                    printDate: responsePrinter.print_date,
+                    serialNo: getters.getInfoPrinter.serial_no,
+                    closingNo: responsePrinter.closing_no,
                     orderUuid,
-                    documentNo: response.document_no,
+                    documentNo: responsePrinter.document_no,
                     isOpenRefund,
                     createPayments
                   })
                     .then(() => {
-                      resolve(response)
+                      resolve(responsePrinter)
                     })
+                }
+                if (!isEmptyValue(responsePrinter.error)) {
+                  dispatch('printerError', {
+                    posId,
+                    message: responsePrinter.error
+                  })
+                } else {
+                  dispatch('printerError', {
+                    posId,
+                    lastFiscalInvoiceNo: invoice.id,
+                    message: responsePrinter.topic_name,
+                    fiscalDocumentNo: responsePrinter.document_no,
+                    fiscalDocumentUuid: responsePrinter.document_uuid
+                  })
                 }
               })
               .catch(error => {
+                let message = error
+                if (!isEmptyValue(error.message)) message = error.message
+                dispatch('printerError', {
+                  posId,
+                  message,
+                  fiscalDocumentNo: response.result_values.invoice.document_no,
+                  fiscalDocumentUuid: response.result_values.invoice.document_uuid
+                })
                 reject(error)
                 showMessage({
                   type: 'error',
@@ -700,6 +726,7 @@ export default {
         createPayments
       })
         .then(response => {
+          console.log({ response })
           resolve(response)
         })
         .catch(error => {
@@ -720,7 +747,8 @@ export default {
     })
   },
   simulateReverseSales({
-    dispatch
+    dispatch,
+    getters
   }, {
     id,
     posId,
@@ -771,18 +799,18 @@ export default {
               taxes,
               lines
             })
-              .then(response => {
-                if (!isEmptyValue(response.closing_no) && !isEmptyValue(response.document_no)) {
+              .then(responsePrinter => {
+                if (!isEmptyValue(responsePrinter.closing_no) && !isEmptyValue(responsePrinter.document_no)) {
                   dispatch('processReverseSalesWithout', {
                     id,
                     posId,
                     posUuid,
                     payments,
-                    printDate: response.print_date,
-                    serialNo: response.printer_no,
-                    closingNo: response.closing_no,
+                    printDate: responsePrinter.print_date,
+                    serialNo: getters.getInfoPrinter.serial_no,
+                    closingNo: responsePrinter.closing_no,
                     orderUuid,
-                    documentNo: response.document_no,
+                    documentNo: responsePrinter.document_no,
                     isOpenRefund,
                     createPayments
                   })
@@ -790,19 +818,41 @@ export default {
                       resolve(responseReverseSalesWithout)
                     })
                 }
+                if (!isEmptyValue(response.error)) {
+                  dispatch('printerError', {
+                    posId,
+                    message: response.error,
+                    fiscalDocumentNo: response.result_values.invoice.document_no,
+                    fiscalDocumentUuid: response.result_values.invoice.document_uuid
+                  })
+                } else {
+                  dispatch('printerError', {
+                    posId,
+                    message: response.topic_name,
+                    fiscalDocumentNo: response.result_values.invoice.document_no,
+                    fiscalDocumentUuid: response.result_values.invoice.document_uuid
+                  })
+                }
               })
               .catch(error => {
-                reject(error)
+                let message = error
+                if (!isEmptyValue(error.message)) message = error.message
+                dispatch('printerError', {
+                  posId,
+                  message,
+                  fiscalDocumentNo: response.result_values.invoice.document_no,
+                  fiscalDocumentUuid: response.result_values.invoice.document_uuid
+                })
                 showMessage({
                   type: 'error',
-                  message: error.message,
+                  message,
                   showClose: true
                 })
+                reject(error)
               })
           }
         })
         .catch(error => {
-          console.log({ error })
           let message = error.message
           if (
             !isEmptyValue(error.response) &&

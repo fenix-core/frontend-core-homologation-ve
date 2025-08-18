@@ -357,7 +357,15 @@ export default {
           dateTo: 'Date To',
           dateOrder: 'Date Order',
           dateFrom: 'Date From',
-          productQuery: 'Product Query'
+          productQuery: 'Product Query',
+          reportx: 'Informe X',
+          reportz: 'Reporte Z',
+          printReportXDay: 'Imprimir Reporte X del día',
+          printReportZDay: 'Imprimir Reporte Z del día',
+          printLoadingReportXDay: 'Imprimiendo el Reporte X del día',
+          printLoadingReportZDay: 'Imprimiendo el Reporte Z del día',
+          configuración: 'Configuración',
+          runningProcess: 'Running Process'
         }
       },
       generalNotifications: {
