@@ -30,6 +30,7 @@ import { isEmptyValue } from '@/utils/ADempiere'
 // import { isEmptyValue } from '@/utils/ADempiere/valueUtils.js'
 // import { extractPagingToken } from '@/utils/ADempiere/dataUtils'
 import { showMessage } from '@/utils/ADempiere/notification.js'
+import { getUuidv4 } from '@/utils/ADempiere/recordUtil'
 // import language from '@/lang'
 
 /**
@@ -111,7 +112,7 @@ const homologacion = {
                 lastFiscalInvoiceNo: responsePrinter.last_invoice_no,
                 lastFiscalCreditMemoNo: responsePrinter.last_credit_memo_no,
                 message: responsePrinter.error,
-                fiscalDocumentUuid: crypto.randomUUID(),
+                fiscalDocumentUuid: getUuidv4(),
                 fiscalDocumentNo: responsePrinter.document_no
               })
               showMessage({
@@ -125,7 +126,7 @@ const homologacion = {
                 lastFiscalInvoiceNo: responsePrinter.last_invoice_no,
                 lastFiscalCreditMemoNo: responsePrinter.last_credit_memo_no,
                 message: '(OK) -' + JSON.stringify(responsePrinter),
-                fiscalDocumentUuid: crypto.randomUUID(),
+                fiscalDocumentUuid: getUuidv4(),
                 fiscalDocumentNo: responsePrinter.document_no
               })
               showMessage({
@@ -143,7 +144,7 @@ const homologacion = {
             dispatch('printerError', {
               posId,
               message,
-              fiscalDocumentUuid: crypto.randomUUID()
+              fiscalDocumentUuid: getUuidv4()
             })
             showMessage({
               type: 'error',
