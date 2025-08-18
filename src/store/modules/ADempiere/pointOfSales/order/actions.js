@@ -550,6 +550,11 @@ export default {
               payments
             })
               .then(response => {
+                dispatch('printerError', {
+                  posId,
+                  message: 'OK',
+                  fiscalDocumentUuid: crypto.randomUUID()
+                })
                 resolve(response)
               })
               .catch(error => {
@@ -557,6 +562,11 @@ export default {
                   type: 'error',
                   message: error.message,
                   showClose: true
+                })
+                dispatch('printerError', {
+                  posId,
+                  message: error.message,
+                  fiscalDocumentUuid: crypto.randomUUID()
                 })
                 reject(error)
               })
@@ -625,8 +635,6 @@ export default {
               lines
             })
               .then(responsePrinter => {
-                const { result_values } = responsePrinter
-                console.log({ responsePrinter, result_values })
                 if (!isEmptyValue(responsePrinter.closing_no) && !isEmptyValue(responsePrinter.document_no)) {
                   dispatch('processWithoutPrint', {
                     id,
@@ -737,6 +745,11 @@ export default {
           ) {
             message = error.response.data.message
           }
+          dispatch('printerError', {
+            posId,
+            message,
+            fiscalDocumentUuid: crypto.randomUUID()
+          })
           showMessage({
             message,
             type: 'error',
@@ -860,6 +873,11 @@ export default {
           ) {
             message = error.response.data.message
           }
+          dispatch('printerError', {
+            posId,
+            message,
+            fiscalDocumentUuid: crypto.randomUUID()
+          })
           showMessage({
             message,
             type: 'error',
@@ -910,6 +928,11 @@ export default {
           ) {
             message = error.response.data.message
           }
+          dispatch('printerError', {
+            posId,
+            message,
+            fiscalDocumentUuid: crypto.randomUUID()
+          })
           showMessage({
             message,
             type: 'error',
