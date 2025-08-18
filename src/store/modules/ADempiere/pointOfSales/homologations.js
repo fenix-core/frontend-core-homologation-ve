@@ -105,19 +105,37 @@ const homologacion = {
           firmware_version
         })
           .then(responsePrinter => {
-            dispatch('printerError', {
-              posId,
-              lastFiscalInvoiceNo: responsePrinter.last_invoice_no,
-              lastFiscalCreditMemoNo: responsePrinter.last_credit_memo_no,
-              message: 'Ok',
-              fiscalDocumentNo: responsePrinter.document_no,
-              fiscalDocumentUuid: responsePrinter.document_uuid
-            })
-            showMessage({
-              type: 'success',
-              message: 'OK',
-              showClose: true
-            })
+            if (responsePrinter.error) {
+              dispatch('printerError', {
+                posId,
+                lastFiscalInvoiceNo: responsePrinter.last_invoice_no,
+                lastFiscalCreditMemoNo: responsePrinter.last_credit_memo_no,
+                message: responsePrinter.error,
+                fiscalDocumentUuid: crypto.randomUUID(),
+                fiscalDocumentNo: responsePrinter.document_no
+              })
+              showMessage({
+                type: 'error',
+                message: responsePrinter.error,
+                showClose: true
+              })
+            } else {
+              dispatch('printerError', {
+                posId,
+                lastFiscalInvoiceNo: responsePrinter.last_invoice_no,
+                lastFiscalCreditMemoNo: responsePrinter.last_credit_memo_no,
+                message: '(OK) -' + JSON.stringify(responsePrinter),
+                fiscalDocumentUuid: crypto.randomUUID(),
+                fiscalDocumentNo: responsePrinter.document_no
+              })
+              showMessage({
+                type: 'success',
+                message: 'OK',
+                showClose: true
+              })
+            }
+
+            resolve(responsePrinter)
           })
           .catch(error => {
             let message = error
