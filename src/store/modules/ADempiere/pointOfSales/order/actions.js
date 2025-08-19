@@ -43,7 +43,6 @@ import { extractPagingToken, generatePageToken } from '@/utils/ADempiere/dataUti
 import { showMessage } from '@/utils/ADempiere/notification.js'
 import { buildLinkHref } from '@/utils/ADempiere/resource.js'
 import { getUuidv4 } from '@/utils/ADempiere/recordUtil'
-
 // Constants
 import { REPORT_VIEWER_NAME } from '@/utils/ADempiere/constants/report'
 /**
@@ -581,14 +580,18 @@ export default {
                 resolve(response)
               })
               .catch(error => {
+                let message = error
+                if (!isEmptyValue(error) && !isEmptyValue(error.message)) {
+                  message = error.message
+                }
                 showMessage({
                   type: 'error',
-                  message: error.message,
+                  message: message,
                   showClose: true
                 })
                 dispatch('printerError', {
                   posId,
-                  message: error.message,
+                  message: message,
                   fiscalDocumentUuid: getUuidv4()
                 })
                 reject(error)
@@ -601,7 +604,7 @@ export default {
             }
             showMessage({
               type: 'error',
-              message,
+              message: message,
               showClose: true
             })
             reject(error)
@@ -735,11 +738,6 @@ export default {
           ) {
             message = error.response.data.message
           }
-          dispatch('printerError', {
-            posId,
-            message,
-            fiscalDocumentUuid: getUuidv4()
-          })
           showMessage({
             message,
             type: 'error',
@@ -780,6 +778,7 @@ export default {
         createPayments
       })
         .then(response => {
+          console.log({ response })
           resolve(response)
         })
         .catch(error => {
@@ -801,9 +800,6 @@ export default {
             showClose: true
           })
           reject(error)
-        })
-        .finally(() => {
-          resolve()
         })
     })
   },
@@ -877,9 +873,6 @@ export default {
                   })
                     .then(responseReverseSalesWithout => {
                       resolve(responseReverseSalesWithout)
-                    })
-                    .finally(() => {
-                      resolve()
                     })
                 }
                 if (!isEmptyValue(response.error)) {

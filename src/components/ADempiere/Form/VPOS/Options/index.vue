@@ -2277,7 +2277,9 @@ export default {
           }
         })
         .catch(error => {
-          console.error(error.message)
+          let message = error
+          if (!isEmptyValue(error.message)) message = error.message
+          if (!isEmptyValue(error.error)) message = error.error
           this.showReverseOrder = true
           this.summaryReverseOrder = {
             type: 'error',
@@ -2286,7 +2288,7 @@ export default {
           }
           this.$message({
             type: 'error',
-            message: error.message,
+            message: message,
             showClose: true
           })
         })
