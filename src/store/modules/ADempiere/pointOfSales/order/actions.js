@@ -81,6 +81,9 @@ export default {
         return order
       })
       .catch(error => {
+        dispatch('printerError', {
+          message: error.message
+        })
         console.error(error.message)
         showMessage({
           type: 'error',
@@ -134,6 +137,9 @@ export default {
       .catch(error => {
         dispatch('reloadOrder', { orderUuid })
         console.error(error.message)
+        dispatch('printerError', {
+          message: error.message
+        })
         showMessage({
           type: 'error',
           message: error.message,
@@ -152,7 +158,7 @@ export default {
    * @param {number} price Price Producto
    * @param {number} discountRate DiscountRate Producto
    */
-  createOrderLine({ commit, dispatch, rootGetters }, {
+  createOrderLine({ commit, dispatch, getters, rootGetters }, {
     posUuid,
     orderUuid,
     productUuid,
@@ -186,6 +192,11 @@ export default {
       })
       .catch(error => {
         console.warn(error.message)
+        dispatch('printerError', {
+          posId: getters.posAttributes.currentPointOfSales.id,
+          message: error.message,
+          fiscalDocumentUuid: getUuidv4()
+        })
         showMessage({
           type: 'error',
           message: error.message,
@@ -516,6 +527,11 @@ export default {
                   message: error.message,
                   showClose: true
                 })
+                dispatch('printerError', {
+                  posId,
+                  message: error.message,
+                  fiscalDocumentUuid: getUuidv4()
+                })
                 reject(error)
               })
           })
@@ -524,6 +540,11 @@ export default {
               type: 'error',
               message: error.message,
               showClose: true
+            })
+            dispatch('printerError', {
+              posId,
+              message: error.message,
+              fiscalDocumentUuid: getUuidv4()
             })
             reject(error)
           })
@@ -555,17 +576,22 @@ export default {
                   message: 'OK',
                   fiscalDocumentUuid: getUuidv4()
                 })
+                dispatch('reloadOrder', { orderUuid })
                 resolve(response)
               })
               .catch(error => {
+                let message = error
+                if (!isEmptyValue(error) && !isEmptyValue(error.message)) {
+                  message = error.message
+                }
                 showMessage({
                   type: 'error',
-                  message: error.message,
+                  message: message,
                   showClose: true
                 })
                 dispatch('printerError', {
                   posId,
-                  message: error.message,
+                  message: message,
                   fiscalDocumentUuid: getUuidv4()
                 })
                 reject(error)
@@ -652,12 +678,29 @@ export default {
                     .then(() => {
                       resolve(responsePrinter)
                     })
+                    .catch(error => {
+                      let message = error.message
+                      if (
+                        !isEmptyValue(error.response) &&
+                        !isEmptyValue(error.response.data)
+                      ) {
+                        message = error.response.data.message
+                      }
+                      dispatch('printerError', {
+                        posId,
+                        message,
+                        fiscalDocumentUuid: getUuidv4()
+                      })
+                      reject(error)
+                    })
                 }
                 if (!isEmptyValue(responsePrinter.error)) {
                   dispatch('printerError', {
                     posId,
                     message: responsePrinter.error
                   })
+                  reject(responsePrinter.error)
+                  return
                 } else {
                   dispatch('printerError', {
                     posId,
@@ -674,8 +717,7 @@ export default {
                 dispatch('printerError', {
                   posId,
                   message,
-                  fiscalDocumentNo: response.result_values.invoice.document_no,
-                  fiscalDocumentUuid: response.result_values.invoice.document_uuid
+                  fiscalDocumentUuid: getUuidv4()
                 })
                 reject(error)
                 showMessage({
@@ -700,6 +742,9 @@ export default {
             showClose: true
           })
           reject(error)
+        })
+        .finally(() => {
+          resolve()
         })
     })
   },
@@ -863,6 +908,9 @@ export default {
                 })
                 reject(error)
               })
+              .finally(() => {
+                resolve()
+              })
           }
         })
         .catch(error => {
@@ -884,6 +932,9 @@ export default {
             showClose: true
           })
           reject(error)
+        })
+        .finally(() => {
+          resolve()
         })
     })
   },
@@ -939,6 +990,9 @@ export default {
             showClose: true
           })
           reject(error)
+        })
+        .finally(() => {
+          resolve()
         })
     })
   },
