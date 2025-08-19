@@ -42,7 +42,7 @@ import { isEmptyValue, convertValuesToSendListOrders } from '@/utils/ADempiere/v
 import { extractPagingToken, generatePageToken } from '@/utils/ADempiere/dataUtils'
 import { showMessage } from '@/utils/ADempiere/notification.js'
 import { buildLinkHref } from '@/utils/ADempiere/resource.js'
-
+import { getUuidv4 } from '@/utils/ADempiere/recordUtil'
 // Constants
 import { REPORT_VIEWER_NAME } from '@/utils/ADempiere/constants/report'
 /**
@@ -553,7 +553,7 @@ export default {
                 dispatch('printerError', {
                   posId,
                   message: 'OK',
-                  fiscalDocumentUuid: crypto.randomUUID()
+                  fiscalDocumentUuid: getUuidv4()
                 })
                 resolve(response)
               })
@@ -566,7 +566,7 @@ export default {
                 dispatch('printerError', {
                   posId,
                   message: error.message,
-                  fiscalDocumentUuid: crypto.randomUUID()
+                  fiscalDocumentUuid: getUuidv4()
                 })
                 reject(error)
               })
@@ -748,7 +748,7 @@ export default {
           dispatch('printerError', {
             posId,
             message,
-            fiscalDocumentUuid: crypto.randomUUID()
+            fiscalDocumentUuid: getUuidv4()
           })
           showMessage({
             message,
@@ -876,7 +876,7 @@ export default {
           dispatch('printerError', {
             posId,
             message,
-            fiscalDocumentUuid: crypto.randomUUID()
+            fiscalDocumentUuid: getUuidv4()
           })
           showMessage({
             message,
@@ -931,7 +931,7 @@ export default {
           dispatch('printerError', {
             posId,
             message,
-            fiscalDocumentUuid: crypto.randomUUID()
+            fiscalDocumentUuid: getUuidv4()
           })
           showMessage({
             message,
