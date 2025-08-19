@@ -32,6 +32,7 @@ along with this program.  If not, see <https:www.gnu.org/licenses/>.
         <el-button
           type="primary"
           icon="el-icon-check"
+          :loading="isLoadingCheck"
           :disabled="isEmptyValue(infoPrinter) && isLoadingCheck"
           style="background: #46a6ff;border-color: #46a6ff;background-color: #46a6ff;"
           @click="printReportX()"
