@@ -745,9 +745,6 @@ export default {
           })
           reject(error)
         })
-        .finally(() => {
-          resolve()
-        })
     })
   },
   processWithoutPrint({
