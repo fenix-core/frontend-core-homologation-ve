@@ -42,7 +42,6 @@ import { isEmptyValue, convertValuesToSendListOrders } from '@/utils/ADempiere/v
 import { extractPagingToken, generatePageToken } from '@/utils/ADempiere/dataUtils'
 import { showMessage } from '@/utils/ADempiere/notification.js'
 import { buildLinkHref } from '@/utils/ADempiere/resource.js'
-import { getUuidv4 } from '@/utils/ADempiere/recordUtil'
 
 // Constants
 import { REPORT_VIEWER_NAME } from '@/utils/ADempiere/constants/report'
@@ -82,9 +81,6 @@ export default {
         return order
       })
       .catch(error => {
-        dispatch('printerError', {
-          message: error.message
-        })
         console.error(error.message)
         showMessage({
           type: 'error',
@@ -138,9 +134,6 @@ export default {
       .catch(error => {
         dispatch('reloadOrder', { orderUuid })
         console.error(error.message)
-        dispatch('printerError', {
-          message: error.message
-        })
         showMessage({
           type: 'error',
           message: error.message,
@@ -159,7 +152,7 @@ export default {
    * @param {number} price Price Producto
    * @param {number} discountRate DiscountRate Producto
    */
-  createOrderLine({ commit, dispatch, getters, rootGetters }, {
+  createOrderLine({ commit, dispatch, rootGetters }, {
     posUuid,
     orderUuid,
     productUuid,
@@ -193,11 +186,6 @@ export default {
       })
       .catch(error => {
         console.warn(error.message)
-        dispatch('printerError', {
-          posId: getters.posAttributes.currentPointOfSales.id,
-          message: error.message,
-          fiscalDocumentUuid: getUuidv4()
-        })
         showMessage({
           type: 'error',
           message: error.message,
@@ -528,11 +516,6 @@ export default {
                   message: error.message,
                   showClose: true
                 })
-                dispatch('printerError', {
-                  posId,
-                  message: error.message,
-                  fiscalDocumentUuid: getUuidv4()
-                })
                 reject(error)
               })
           })
@@ -541,11 +524,6 @@ export default {
               type: 'error',
               message: error.message,
               showClose: true
-            })
-            dispatch('printerError', {
-              posId,
-              message: error.message,
-              fiscalDocumentUuid: getUuidv4()
             })
             reject(error)
           })
@@ -575,9 +553,8 @@ export default {
                 dispatch('printerError', {
                   posId,
                   message: 'OK',
-                  fiscalDocumentUuid: getUuidv4()
+                  fiscalDocumentUuid: crypto.randomUUID()
                 })
-                dispatch('reloadOrder', { orderUuid })
                 resolve(response)
               })
               .catch(error => {
@@ -589,19 +566,15 @@ export default {
                 dispatch('printerError', {
                   posId,
                   message: error.message,
-                  fiscalDocumentUuid: getUuidv4()
+                  fiscalDocumentUuid: crypto.randomUUID()
                 })
                 reject(error)
               })
           })
           .catch(error => {
-            let message = error
-            if (!isEmptyValue(error) && !isEmptyValue(error.message)) {
-              message = error.message
-            }
             showMessage({
               type: 'error',
-              message,
+              message: error.message,
               showClose: true
             })
             reject(error)
@@ -632,6 +605,7 @@ export default {
         payments
       })
         .then(response => {
+          console.log({ response })
           if (!isEmptyValue(response) && !isEmptyValue(response.result_values)) {
             const baseUrl = response.result_values.host_name
             const port = response.result_values.port
@@ -678,35 +652,19 @@ export default {
                     .then(() => {
                       resolve(responsePrinter)
                     })
-                    .catch(error => {
-                      let message = error.message
-                      if (
-                        !isEmptyValue(error.response) &&
-                        !isEmptyValue(error.response.data)
-                      ) {
-                        message = error.response.data.message
-                      }
-                      dispatch('printerError', {
-                        posId,
-                        message,
-                        fiscalDocumentUuid: getUuidv4()
-                      })
-                      reject(error)
-                    })
                 }
                 if (!isEmptyValue(responsePrinter.error)) {
                   dispatch('printerError', {
                     posId,
                     message: responsePrinter.error
                   })
-                  reject(responsePrinter.error)
-                  return
                 } else {
                   dispatch('printerError', {
                     posId,
                     lastFiscalInvoiceNo: invoice.id,
                     message: responsePrinter.topic_name,
-                    fiscalDocumentUuid: getUuidv4()
+                    fiscalDocumentNo: responsePrinter.document_no,
+                    fiscalDocumentUuid: responsePrinter.document_uuid
                   })
                 }
               })
@@ -716,7 +674,8 @@ export default {
                 dispatch('printerError', {
                   posId,
                   message,
-                  fiscalDocumentUuid: getUuidv4()
+                  fiscalDocumentNo: response.result_values.invoice.document_no,
+                  fiscalDocumentUuid: response.result_values.invoice.document_uuid
                 })
                 reject(error)
                 showMessage({
@@ -735,11 +694,6 @@ export default {
           ) {
             message = error.response.data.message
           }
-          dispatch('printerError', {
-            posId,
-            message,
-            fiscalDocumentUuid: getUuidv4()
-          })
           showMessage({
             message,
             type: 'error',
@@ -780,6 +734,7 @@ export default {
         createPayments
       })
         .then(response => {
+          console.log({ response })
           resolve(response)
         })
         .catch(error => {
@@ -793,7 +748,7 @@ export default {
           dispatch('printerError', {
             posId,
             message,
-            fiscalDocumentUuid: getUuidv4()
+            fiscalDocumentUuid: crypto.randomUUID()
           })
           showMessage({
             message,
@@ -801,9 +756,6 @@ export default {
             showClose: true
           })
           reject(error)
-        })
-        .finally(() => {
-          resolve()
         })
     })
   },
@@ -878,9 +830,6 @@ export default {
                     .then(responseReverseSalesWithout => {
                       resolve(responseReverseSalesWithout)
                     })
-                    .finally(() => {
-                      resolve()
-                    })
                 }
                 if (!isEmptyValue(response.error)) {
                   dispatch('printerError', {
@@ -914,9 +863,6 @@ export default {
                 })
                 reject(error)
               })
-              .finally(() => {
-                resolve()
-              })
           }
         })
         .catch(error => {
@@ -930,7 +876,7 @@ export default {
           dispatch('printerError', {
             posId,
             message,
-            fiscalDocumentUuid: getUuidv4()
+            fiscalDocumentUuid: crypto.randomUUID()
           })
           showMessage({
             message,
@@ -938,9 +884,6 @@ export default {
             showClose: true
           })
           reject(error)
-        })
-        .finally(() => {
-          resolve()
         })
     })
   },
@@ -988,7 +931,7 @@ export default {
           dispatch('printerError', {
             posId,
             message,
-            fiscalDocumentUuid: getUuidv4()
+            fiscalDocumentUuid: crypto.randomUUID()
           })
           showMessage({
             message,
@@ -996,9 +939,6 @@ export default {
             showClose: true
           })
           reject(error)
-        })
-        .finally(() => {
-          resolve()
         })
     })
   },
