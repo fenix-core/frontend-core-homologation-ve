@@ -878,23 +878,35 @@ export default {
                     .then(responseReverseSalesWithout => {
                       resolve(responseReverseSalesWithout)
                     })
-                    .finally(() => {
-                      resolve()
+                    .catch(error => {
+                      let message = error
+                      if (!isEmptyValue(error.message)) message = error.message
+                      if (
+                        !isEmptyValue(error.response) &&
+                        !isEmptyValue(error.response.data)
+                      ) {
+                        message = error.response.data.message
+                      }
+                      dispatch('printerError', {
+                        posId,
+                        message,
+                        fiscalDocumentUuid: getUuidv4()
+                      })
+                      reject(error)
                     })
                 }
-                if (!isEmptyValue(response.error)) {
+                if (!isEmptyValue(responsePrinter.error)) {
                   dispatch('printerError', {
                     posId,
-                    message: response.error,
-                    fiscalDocumentNo: response.result_values.invoice.document_no,
-                    fiscalDocumentUuid: response.result_values.invoice.document_uuid
+                    message: responsePrinter.error,
+                    fiscalDocumentUuid: getUuidv4()
                   })
+                  reject(responsePrinter)
                 } else {
                   dispatch('printerError', {
                     posId,
-                    message: response.topic_name,
-                    fiscalDocumentNo: response.result_values.invoice.document_no,
-                    fiscalDocumentUuid: response.result_values.invoice.document_uuid
+                    message: responsePrinter.topic_name,
+                    fiscalDocumentUuid: getUuidv4()
                   })
                 }
               })
@@ -904,19 +916,19 @@ export default {
                 dispatch('printerError', {
                   posId,
                   message,
-                  fiscalDocumentNo: response.result_values.invoice.document_no,
-                  fiscalDocumentUuid: response.result_values.invoice.document_uuid
+                  fiscalDocumentUuid: getUuidv4()
                 })
-                showMessage({
-                  type: 'error',
-                  message,
-                  showClose: true
-                })
+                // showMessage({
+                //   type: 'error',
+                //   // message,
+                //   message: !isEmptyValue(error.message) ? :error.message,
+                //   showClose: true
+                // })
                 reject(error)
               })
-              .finally(() => {
-                resolve()
-              })
+              // .finally(() => {
+              //   resolve()
+              // })
           }
         })
         .catch(error => {
@@ -938,9 +950,6 @@ export default {
             showClose: true
           })
           reject(error)
-        })
-        .finally(() => {
-          resolve()
         })
     })
   },
