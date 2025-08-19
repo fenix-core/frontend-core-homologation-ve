@@ -598,9 +598,13 @@ export default {
               })
           })
           .catch(error => {
+            let message = error
+            if (!isEmptyValue(error) && !isEmptyValue(error.message)) {
+              message = error.message
+            }
             showMessage({
               type: 'error',
-              message: error.message,
+              message: message,
               showClose: true
             })
             reject(error)
@@ -631,7 +635,6 @@ export default {
         payments
       })
         .then(response => {
-          console.log({ response })
           if (!isEmptyValue(response) && !isEmptyValue(response.result_values)) {
             const baseUrl = response.result_values.host_name
             const port = response.result_values.port
@@ -706,8 +709,7 @@ export default {
                     posId,
                     lastFiscalInvoiceNo: invoice.id,
                     message: responsePrinter.topic_name,
-                    fiscalDocumentNo: responsePrinter.document_no,
-                    fiscalDocumentUuid: responsePrinter.document_uuid
+                    fiscalDocumentUuid: getUuidv4()
                   })
                 }
               })
