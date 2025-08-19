@@ -165,8 +165,14 @@ const homologacion = {
       lastFiscalCreditMemoNo
     }) {
       return new Promise(resolve => {
+        if (isEmptyValue(posId)) {
+          posId = getters.posAttributes.currentPointOfSales.id
+        }
         if (isEmptyValue(printerId)) {
           printerId = getters.getInfoPrinter.id
+        }
+        if (isEmptyValue(fiscalDocumentUuid)) {
+          fiscalDocumentUuid = getUuidv4()
         }
         createPrinterError({
           posId,
