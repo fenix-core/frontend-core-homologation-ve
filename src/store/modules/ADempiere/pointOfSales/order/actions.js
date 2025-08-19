@@ -875,19 +875,19 @@ export default {
                       resolve(responseReverseSalesWithout)
                     })
                 }
-                if (!isEmptyValue(response.error)) {
+                if (!isEmptyValue(responsePrinter.error)) {
                   dispatch('printerError', {
                     posId,
-                    message: response.error,
+                    message: responsePrinter.error,
                     fiscalDocumentNo: response.result_values.invoice.document_no,
                     fiscalDocumentUuid: response.result_values.invoice.document_uuid
                   })
+                  reject(responsePrinter)
                 } else {
                   dispatch('printerError', {
                     posId,
                     message: response.topic_name,
-                    fiscalDocumentNo: response.result_values.invoice.document_no,
-                    fiscalDocumentUuid: response.result_values.invoice.document_uuid
+                    fiscalDocumentUuid: getUuidv4()
                   })
                 }
               })
@@ -897,8 +897,7 @@ export default {
                 dispatch('printerError', {
                   posId,
                   message,
-                  fiscalDocumentNo: response.result_values.invoice.document_no,
-                  fiscalDocumentUuid: response.result_values.invoice.document_uuid
+                  fiscalDocumentUuid: getUuidv4()
                 })
                 showMessage({
                   type: 'error',
