@@ -879,14 +879,13 @@ export default {
                   dispatch('printerError', {
                     posId,
                     message: responsePrinter.error,
-                    fiscalDocumentNo: response.result_values.invoice.document_no,
-                    fiscalDocumentUuid: response.result_values.invoice.document_uuid
+                    fiscalDocumentUuid: getUuidv4()
                   })
                   reject(responsePrinter)
                 } else {
                   dispatch('printerError', {
                     posId,
-                    message: response.topic_name,
+                    message: 'OK',
                     fiscalDocumentUuid: getUuidv4()
                   })
                 }
@@ -905,9 +904,6 @@ export default {
                   showClose: true
                 })
                 reject(error)
-              })
-              .finally(() => {
-                resolve()
               })
           }
         })
@@ -930,9 +926,6 @@ export default {
             showClose: true
           })
           reject(error)
-        })
-        .finally(() => {
-          resolve()
         })
     })
   },
