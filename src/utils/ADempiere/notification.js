@@ -88,9 +88,9 @@ export function showNotification({ type = 'success', title, message = '', summar
  * @param {number} duration
  */
 export function showMessage({ type = 'success', message, duration = 0 }) {
-  let delay = 3000
+  let delay = 10000
   if (type === 'info') {
-    delay = 2000
+    delay = 10000
   }
   if (duration) {
     delay = duration
