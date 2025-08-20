@@ -574,6 +574,7 @@ export default {
                 dispatch('printerError', {
                   posId,
                   message: 'OK',
+                  isError: false,
                   fiscalDocumentUuid: getUuidv4()
                 })
                 dispatch('reloadOrder', { orderUuid })
@@ -707,6 +708,7 @@ export default {
                 } else {
                   dispatch('printerError', {
                     posId,
+                    isError: false,
                     lastFiscalInvoiceNo: invoice.id,
                     message: responsePrinter.topic_name,
                     fiscalDocumentUuid: getUuidv4()
@@ -886,6 +888,7 @@ export default {
                   dispatch('printerError', {
                     posId,
                     message: 'OK',
+                    isError: false,
                     fiscalDocumentUuid: getUuidv4()
                   })
                 }

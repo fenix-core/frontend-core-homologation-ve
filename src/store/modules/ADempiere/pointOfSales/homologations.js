@@ -123,6 +123,7 @@ const homologacion = {
             } else {
               dispatch('printerError', {
                 posId,
+                isError: false,
                 lastFiscalInvoiceNo: responsePrinter.last_invoice_no,
                 lastFiscalCreditMemoNo: responsePrinter.last_credit_memo_no,
                 message: '(OK) -' + JSON.stringify(responsePrinter),
@@ -158,6 +159,7 @@ const homologacion = {
     printerError({ commit, getters }, {
       posId,
       message,
+      isError = true,
       printerId,
       fiscalDocumentNo,
       fiscalDocumentUuid,
@@ -177,6 +179,7 @@ const homologacion = {
         createPrinterError({
           posId,
           message,
+          isError,
           printerId,
           fiscalDocumentNo,
           fiscalDocumentUuid,

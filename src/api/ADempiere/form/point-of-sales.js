@@ -1912,6 +1912,8 @@ export function processReverseSalesWithoutPrintRequest({
   posId,
   pos_uuid,
   payments,
+  serialNo,
+  documentNo,
   is_open_refund
 }) {
   if (!isEmptyValue(payments)) {
@@ -1935,7 +1937,9 @@ export function processReverseSalesWithoutPrintRequest({
       pos_id: posId,
       pos_uuid,
       payments,
-      is_open_refund
+      is_open_refund,
+      fiscal_document_no: documentNo,
+      fiscal_printer_serial_no: serialNo
     },
     isHomologation: true
   })
@@ -1954,6 +1958,7 @@ export function requestPirnterDeviceInfo({
 export function createPrinterError({
   posId,
   message,
+  isError,
   printerId,
   fiscalDocumentNo,
   fiscalDocumentUuid,
@@ -1966,6 +1971,7 @@ export function createPrinterError({
     data: {
       message,
       pos_id: posId,
+      is_error: isError,
       printer_id: printerId,
       fiscal_document_no: fiscalDocumentNo,
       fiscal_document_uuid: fiscalDocumentUuid,
